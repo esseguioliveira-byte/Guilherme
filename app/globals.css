@@ -1,0 +1,189 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: #02040a;
+  --color-foreground: #ffffff;
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-jakarta);
+  --font-body: var(--font-space);
+  --color-primary: #3b82f6;
+  --color-card: rgba(10, 10, 20, 0.4);
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-nebula-gold: #ffcc33;
+  --color-nebula-cyan: #00e5ff;
+  --color-nebula-magenta: #ff00ea;
+}
+
+:root {
+  --primary-glow: rgba(59, 130, 246, 0.4);
+}
+
+body {
+  background: radial-gradient(circle at top center, #0a0f2b 0%, #02040a 60%, #000000 100%) fixed;
+  color: #ffffff;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+}
+
+@layer components {
+  .glass-card {
+    background: rgba(10, 10, 20, 0.5);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .glass-card:hover {
+    border-color: rgba(59, 130, 246, 0.4);
+    background: rgba(15, 15, 30, 0.6);
+    box-shadow: 0 0 40px -10px var(--primary-glow);
+    transform: translateY(-4px);
+  }
+
+  .nasa-title {
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 900;
+    font-style: italic;
+  }
+
+  .btn-stardust {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(45deg, #1e40af, #3b82f6, #1e40af);
+    background-size: 200% 200%;
+    animation: aurora 6s linear infinite;
+    transition: all 0.3s ease;
+  }
+
+  .btn-stardust:hover {
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.6);
+    transform: scale(1.02);
+  }
+}
+
+@keyframes aurora {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+.star {
+  position: absolute;
+  background-color: white;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: twinkle var(--duration) ease-in-out infinite;
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+}
+
+.star-spike {
+  position: absolute;
+  pointer-events: none;
+  background: white;
+  box-shadow: 0 0 15px white;
+  animation: twinkle var(--duration) ease-in-out infinite;
+}
+
+.star-spike::before,
+.star-spike::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 150, 255, 0.8), white, rgba(255, 150, 255, 0.8), transparent);
+  transform: translate(-50%, -50%) rotate(var(--rotation));
+}
+
+.nebula {
+  position: absolute;
+  pointer-events: none;
+  filter: blur(100px);
+  opacity: 0.3;
+  z-index: -10;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+}
+
+.nebula-glow {
+  filter: blur(40px);
+  opacity: 0.6;
+  mix-blend-mode: soft-light;
+}
+
+.mountain-pillar {
+  position: absolute;
+  background: linear-gradient(to bottom, #4a2b10, #1a0f05);
+  filter: blur(30px);
+  opacity: 0.4;
+  clip-path: polygon(50% 0%, 80% 30%, 100% 60%, 70% 100%, 30% 100%, 0% 60%, 20% 30%);
+}
+
+@keyframes nebula-float {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(20px, 10px) scale(1.1); }
+}
+
+.planet-glow {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  box-shadow: inset -20px -20px 60px rgba(0, 0, 0, 0.9),
+              inset 20px 20px 60px rgba(59, 130, 246, 0.2);
+}
+/* =============================================
+   SCROLL ANIMATIONS
+   Elements start hidden; the [data-visible] attr
+   is toggled by ScrollAnimator via IntersectionObserver.
+   ============================================= */
+
+/* Base state — hidden by default */
+[data-scroll] {
+  opacity: 0;
+  transition-property: opacity, transform;
+  transition-duration: 0.7s;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--scroll-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+/* Variants — transform when hidden */
+[data-scroll="fade"]       { transform: none; }
+[data-scroll="up"]         { transform: translateY(40px); }
+[data-scroll="down"]       { transform: translateY(-40px); }
+[data-scroll="left"]       { transform: translateX(50px); }
+[data-scroll="right"]      { transform: translateX(-50px); }
+[data-scroll="zoom"]       { transform: scale(0.88); }
+[data-scroll="zoom-left"]  { transform: scale(0.88) translateX(40px); }
+[data-scroll="zoom-right"] { transform: scale(0.88) translateX(-40px); }
+[data-scroll="flip"]       { transform: rotateX(20deg) translateY(40px); perspective: 1000px; }
+
+/* Triggered — fully visible */
+[data-scroll][data-visible="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Stagger delays for sibling groups */
+[data-stagger] > * { --scroll-delay: 0ms; }
+[data-stagger] > *:nth-child(1)  { --scroll-delay: 0ms; }
+[data-stagger] > *:nth-child(2)  { --scroll-delay: 80ms; }
+[data-stagger] > *:nth-child(3)  { --scroll-delay: 160ms; }
+[data-stagger] > *:nth-child(4)  { --scroll-delay: 240ms; }
+[data-stagger] > *:nth-child(5)  { --scroll-delay: 320ms; }
+[data-stagger] > *:nth-child(6)  { --scroll-delay: 400ms; }
+[data-stagger] > *:nth-child(7)  { --scroll-delay: 480ms; }
+[data-stagger] > *:nth-child(8)  { --scroll-delay: 560ms; }
+
+/* Smooth scroll for anchor links */
+html {
+  scroll-behavior: smooth;
+}
