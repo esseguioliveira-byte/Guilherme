@@ -51,6 +51,7 @@ export default async function Navbar() {
             <div className="flex items-center gap-3">
               <UserDropdown 
                 userName={session.user.name || 'Usuário'} 
+                userImage={user?.image || null}
                 isAffiliate={user?.isAffiliate || false}
                 isAdmin={(user as any)?.role === 'ADMIN'} 
               />

@@ -6,11 +6,12 @@ import Link from 'next/link';
 
 interface UserDropdownProps {
   userName: string;
+  userImage: string | null;
   isAffiliate: boolean;
   isAdmin: boolean;
 }
 
-export default function UserDropdown({ userName, isAffiliate, isAdmin }: UserDropdownProps) {
+export default function UserDropdown({ userName, userImage, isAffiliate, isAdmin }: UserDropdownProps) {
 
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -31,8 +32,12 @@ export default function UserDropdown({ userName, isAffiliate, isAdmin }: UserDro
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 p-1 pr-4 bg-white/5 backdrop-blur-md hover:bg-white/10 rounded-full transition-all border border-white/10 hover:border-white/20 shadow-[0_4px_12px_rgba(0,0,0,0.2)]"
       >
-        <div className="w-8 h-8 bg-primary/20 border border-primary/30 rounded-full flex items-center justify-center shadow-[inset_0_0_10px_rgba(59,130,246,0.2)]">
-          <User className="h-4 w-4 text-primary" />
+        <div className="w-8 h-8 bg-primary/20 border border-primary/30 rounded-full flex items-center justify-center shadow-[inset_0_0_10px_rgba(59,130,246,0.2)] overflow-hidden">
+          {userImage ? (
+            <img src={userImage} alt={userName} className="w-full h-full object-cover" />
+          ) : (
+            <User className="h-4 w-4 text-primary" />
+          )}
         </div>
         <span className="text-sm font-medium hidden sm:block text-gray-200">
           {userName.split(' ')[0] || 'Perfil'}

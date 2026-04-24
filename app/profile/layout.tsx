@@ -33,8 +33,12 @@ export default async function ProfileLayout({
            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[100px] -z-10" />
            
            <div className="flex flex-col md:flex-row items-center gap-8">
-              <div className="w-24 h-24 rounded-3xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-[0_0_30px_rgba(59,130,246,0.2)]">
-                 <span className="text-primary font-black text-4xl italic">{user.name?.[0] || 'U'}</span>
+              <div className="w-24 h-24 rounded-3xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-[0_0_30px_rgba(59,130,246,0.2)] overflow-hidden">
+                 {user.image ? (
+                    <img src={user.image} alt={user.name || 'User'} className="w-full h-full object-cover" />
+                 ) : (
+                    <span className="text-primary font-black text-4xl italic">{user.name?.[0] || 'U'}</span>
+                 )}
               </div>
               <div className="text-center md:text-left flex-1">
                  <h1 className="text-3xl font-black uppercase italic tracking-tight text-white mb-1">
