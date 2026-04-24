@@ -4,7 +4,7 @@ import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
 import Discord from 'next-auth/providers/discord';
 import { db } from '@/db';
-import { users } from '@/db/schema';
+import { users, accounts, sessions, verificationTokens } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { compare } from 'bcryptjs';
 import { z } from 'zod';
@@ -13,7 +13,12 @@ import { cookies } from 'next/headers';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
-  adapter: DrizzleAdapter(db),
+  adapter: DrizzleAdapter(db, {
+    usersTable: users,
+    accountsTable: accounts,
+    sessionsTable: sessions,
+    verificationTokensTable: verificationTokens,
+  }),
   trustHost: true,
   debug: true,
 
