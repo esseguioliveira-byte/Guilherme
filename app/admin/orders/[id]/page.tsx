@@ -59,7 +59,7 @@ export default async function AdminOrderDetailsPage({ params }: { params: { id: 
               {items.map((item) => (
                 <div key={item.id} className="p-6 flex items-center gap-6">
                   <div className="w-16 h-16 bg-white/5 rounded-xl overflow-hidden border border-white/10 flex-shrink-0">
-                    <img src={item.productImage} alt={item.productName || 'Produto'} className="w-full h-full object-cover" />
+                    <img src={item.productImage || undefined} alt={item.productName || 'Produto'} className="w-full h-full object-cover" />
                   </div>
                   <div className="flex-1">
                     <h4 className="text-sm font-bold text-white">{item.productName}</h4>

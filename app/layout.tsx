@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Space_Grotesk, Plus_Jakarta_Sans } from "next/font/google";
 
@@ -51,7 +52,9 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <CartProvider>
           <SpaceBackground />
-          <ReferralTracker />
+          <Suspense fallback={null}>
+            <ReferralTracker />
+          </Suspense>
           <VisitorTracker />
           {children}
 

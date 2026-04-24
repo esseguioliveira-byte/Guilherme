@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { db } from '@/db';
 import { users } from '@/db/schema';
@@ -42,7 +43,9 @@ export default async function AdminAffiliatesPage({
 
       <div className="glass-card rounded-[2rem] border border-white/5 overflow-hidden">
         <div className="p-6 border-b border-white/5 bg-white/[0.02]">
-          <SearchInput placeholder="Buscar por nome ou email..." />
+          <Suspense fallback={<div className="h-10 bg-black/60 border border-white/10 rounded-xl animate-pulse" />}>
+            <SearchInput placeholder="Buscar por nome ou email..." />
+          </Suspense>
         </div>
 
 
