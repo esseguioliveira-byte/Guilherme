@@ -2,7 +2,7 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { db } from '@/db';
 import { orders, orderItems, products, stockItems, users } from '@/db/schema';
-import { eq, desc, inArray } from 'drizzle-orm';
+import { eq, desc, inArray, aliasedTable } from 'drizzle-orm';
 import DeliveryItem from '@/components/profile/DeliveryItem';
 import { Package, ArrowRight, Terminal, DollarSign, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
@@ -19,13 +19,17 @@ export default async function ProfilePage() {
   let deliveredItems: any[] = [];
   
   if (orderIds.length > 0) {
+    const parentProducts = aliasedTable(products, 'parentProducts');
+
     allItems = await db
       .select({
         item: orderItems,
         product: products,
+        parent: parentProducts,
       })
       .from(orderItems)
       .leftJoin(products, eq(orderItems.productId, products.id))
+      .leftJoin(parentProducts, eq(products.parentId, parentProducts.id))
       .where(inArray(orderItems.orderId, orderIds));
 
     deliveredItems = await db
@@ -41,6 +45,7 @@ export default async function ProfilePage() {
       .map(i => ({
         ...i.item,
         product: i.product,
+        imageUrl: i.product?.imageUrl || i.parent?.imageUrl,
         delivered: deliveredItems.filter(d => d.productId === i.item.productId && d.orderId === order.id)
       }))
   }));
@@ -137,7 +142,7 @@ export default async function ProfilePage() {
                 {order.items.map((item) => (
                   <div key={item.id} className="flex items-center gap-4 sm:gap-5 p-3 sm:p-4 bg-white/[0.02] border border-white/5 rounded-xl sm:rounded-2xl group hover:bg-white/[0.04] transition-all">
                     <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[#050505] rounded-lg sm:rounded-xl flex-shrink-0 overflow-hidden border border-white/5">
-                       {item.product?.imageUrl && <img src={item.product.imageUrl} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" alt="" />}
+                       {item.imageUrl && <img src={item.imageUrl} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" alt="" />}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-white font-bold nasa-title text-[11px] sm:text-sm leading-tight mb-1">{item.product?.name || 'Produto'}</p>

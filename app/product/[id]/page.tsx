@@ -19,10 +19,16 @@ export default async function ProductDetailsPage({ params }: { params: { id: str
   }
 
   // Fetch sub-products (variations/plans)
-  const subProducts = await db
+  const subProductsRaw = await db
     .select()
     .from(products)
     .where(eq(products.parentId, product.id));
+
+  // Ensure sub-products inherit parent image if they don't have one
+  const subProducts = subProductsRaw.map(sp => ({
+    ...sp,
+    imageUrl: sp.imageUrl && sp.imageUrl !== '' ? sp.imageUrl : product.imageUrl
+  }));
 
   // Fetch similar products in the same category
   const similarProducts = await db
