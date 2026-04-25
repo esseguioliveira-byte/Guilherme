@@ -68,17 +68,10 @@ export default async function ProfileLayout({
         <div className="flex items-center gap-4 mb-10 overflow-x-auto pb-2 scrollbar-hide">
            <Link 
               href="/profile" 
-              className="flex items-center gap-3 px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-sm font-bold uppercase italic tracking-wider transition-all whitespace-nowrap"
+              className="flex items-center gap-3 px-8 py-4 bg-primary/10 border border-primary/20 rounded-2xl text-sm font-bold uppercase italic tracking-wider transition-all whitespace-nowrap text-white"
            >
               <Package className="w-5 h-5 text-primary" />
               Meus Pedidos
-           </Link>
-           <Link 
-              href="/profile/affiliate" 
-              className="flex items-center gap-3 px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-sm font-bold uppercase italic tracking-wider transition-all whitespace-nowrap"
-           >
-              <DollarSign className="w-5 h-5 text-emerald-400" />
-              Painel de Afiliado
            </Link>
         </div>
 

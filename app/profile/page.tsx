@@ -63,26 +63,37 @@ export default async function ProfilePage() {
           </Link>
         </div>
       ) : (
-        <div className="grid gap-6">
+        <div className="grid gap-4 sm:gap-6">
           {userOrdersList.map((order) => (
-            <div key={order.id} className="glass-card rounded-[2rem] p-8 border border-white/5 hover:border-white/10 transition-all">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-6 pb-6 border-b border-white/5">
-                <div>
-                  <p className="text-[10px] text-gray-600 font-black uppercase tracking-[0.2em] mb-1">ID DO PEDIDO</p>
-                  <p className="text-sm font-mono text-primary font-bold">#{order.id.split('-')[0].toUpperCase()}</p>
+            <div key={order.id} className="glass-card rounded-[1.5rem] sm:rounded-[2rem] p-5 sm:p-8 border border-white/5 hover:border-white/10 transition-all">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6 mb-5 sm:mb-6 pb-5 sm:pb-6 border-b border-white/5">
+                <div className="flex flex-wrap items-center justify-between sm:block gap-4">
+                  <div>
+                    <p className="text-[9px] sm:text-[10px] text-gray-600 font-black uppercase tracking-[0.2em] mb-1">ID DO PEDIDO</p>
+                    <p className="text-xs sm:text-sm font-mono text-primary font-bold">#{order.id.split('-')[0].toUpperCase()}</p>
+                  </div>
+                  
+                  <div className={`sm:hidden px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border
+                    ${order.status === 'PAID' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
+                      order.status === 'PENDING' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' : 
+                      'bg-red-500/10 text-red-500 border-red-500/20'}`}
+                  >
+                    {order.status === 'PAID' ? 'Aprovado' : order.status === 'PENDING' ? 'Pendente' : 'Cancelado'}
+                  </div>
                 </div>
-                <div className="flex items-center gap-8">
-                  <div className="text-left md:text-right">
-                    <p className="text-[10px] text-gray-600 font-black uppercase tracking-[0.2em] mb-1">DATA</p>
-                    <p className="text-sm font-bold text-gray-300">
+
+                <div className="flex items-center justify-between sm:justify-end gap-6 sm:gap-8">
+                  <div className="text-left sm:text-right">
+                    <p className="text-[9px] sm:text-[10px] text-gray-600 font-black uppercase tracking-[0.2em] mb-1">DATA</p>
+                    <p className="text-xs sm:text-sm font-bold text-gray-300">
                       {order.createdAt ? new Date(order.createdAt).toLocaleDateString('pt-BR') : '---'}
                     </p>
                   </div>
-                  <div className="text-left md:text-right">
-                    <p className="text-[10px] text-gray-600 font-black uppercase tracking-[0.2em] mb-1">TOTAL</p>
-                    <p className="text-lg font-black text-white italic">R$ {Number(order.totalAmount).toFixed(2).replace('.', ',')}</p>
+                  <div className="text-left sm:text-right">
+                    <p className="text-[9px] sm:text-[10px] text-gray-600 font-black uppercase tracking-[0.2em] mb-1">TOTAL</p>
+                    <p className="text-base sm:text-lg font-black text-white italic leading-tight">R$ {Number(order.totalAmount).toFixed(2).replace('.', ',')}</p>
                   </div>
-                  <div className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border
+                  <div className={`hidden sm:block px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border
                     ${order.status === 'PAID' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
                       order.status === 'PENDING' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' : 
                       'bg-red-500/10 text-red-500 border-red-500/20'}`}
@@ -92,20 +103,20 @@ export default async function ProfilePage() {
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {order.items.map((item) => (
-                  <div key={item.id} className="flex items-center gap-5 p-4 bg-white/[0.02] border border-white/5 rounded-2xl group hover:bg-white/[0.04] transition-all">
-                    <div className="w-16 h-16 bg-[#050505] rounded-xl flex-shrink-0 overflow-hidden border border-white/5">
+                  <div key={item.id} className="flex items-center gap-4 sm:gap-5 p-3 sm:p-4 bg-white/[0.02] border border-white/5 rounded-xl sm:rounded-2xl group hover:bg-white/[0.04] transition-all">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[#050505] rounded-lg sm:rounded-xl flex-shrink-0 overflow-hidden border border-white/5">
                        {item.product?.imageUrl && <img src={item.product.imageUrl} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" alt="" />}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-white font-bold truncate nasa-title text-sm">{item.product?.name || 'Produto'}</p>
-                      <p className="text-xs text-gray-500 font-medium">Qtd: {item.quantity} × R$ {Number(item.price).toFixed(2).replace('.', ',')}</p>
+                      <p className="text-white font-bold truncate nasa-title text-[11px] sm:text-sm">{item.product?.name || 'Produto'}</p>
+                      <p className="text-[10px] sm:text-xs text-gray-500 font-medium">Qtd: {item.quantity} × R$ {Number(item.price).toFixed(2).replace('.', ',')}</p>
                       
                       {/* Entrega Automática */}
                       {order.status === 'PAID' && item.delivered && item.delivered.length > 0 && (
-                        <div className="mt-4 space-y-2">
-                           <p className="text-[9px] font-black uppercase text-primary flex items-center gap-2">
+                        <div className="mt-3 sm:mt-4 space-y-2">
+                           <p className="text-[8px] sm:text-[9px] font-black uppercase text-primary flex items-center gap-2">
                               <Terminal className="w-3 h-3" /> Sua Entrega:
                            </p>
                            <div className="space-y-2">
@@ -117,8 +128,8 @@ export default async function ProfilePage() {
                       )}
                     </div>
                     {order.status === 'PENDING' && (
-                      <Link href={`/orders/${order.id}`} className="p-3 bg-primary/10 hover:bg-primary text-primary hover:text-white rounded-xl transition-all border border-primary/20">
-                        <ArrowRight className="w-5 h-5" />
+                      <Link href={`/orders/${order.id}`} className="p-2.5 sm:p-3 bg-primary/10 hover:bg-primary text-primary hover:text-white rounded-lg sm:rounded-xl transition-all border border-primary/20">
+                        <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
                       </Link>
                     )}
                   </div>

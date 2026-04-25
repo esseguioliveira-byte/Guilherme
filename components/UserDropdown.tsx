@@ -55,14 +55,14 @@ export default function UserDropdown({ userName, userImage, isAffiliate, isAdmin
               onClick={() => setIsOpen(false)}
               className="flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-[#1a1a1a] rounded-xl transition-colors"
             >
-              <Package className="w-4 h-4" />
+              <Package className="w-4 h-4 text-primary" />
               Meus Pedidos
             </Link>
             {isAffiliate && (
               <Link 
-                href="/affiliates/dashboard" 
+                href="/profile/affiliate" 
                 onClick={() => setIsOpen(false)}
-                className="flex items-center gap-3 px-3 py-2 text-sm text-primary hover:bg-primary/5 rounded-xl transition-colors font-bold"
+                className="flex items-center gap-3 px-3 py-2 text-sm text-emerald-400 hover:bg-emerald-400/5 rounded-xl transition-colors font-bold"
               >
                 <DollarSign className="w-4 h-4" />
                 Painel Afiliado
