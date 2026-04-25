@@ -122,6 +122,7 @@ export const orders = mysqlTable('orders', {
   pixCode: text('pix_code'),
   stylepayPaymentId: varchar('stylepay_payment_id', { length: 255 }),
   pixQrcodeImage: text('pix_qrcode_image'), // Base64 image from Stylepay
+  deliveryEmail: varchar('delivery_email', { length: 255 }),
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
 });
 

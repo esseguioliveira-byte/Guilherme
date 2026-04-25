@@ -13,7 +13,7 @@ interface CartItemInput {
   quantity: number;
 }
 
-export async function processCartPurchase(items: CartItemInput[], couponCode?: string) {
+export async function processCartPurchase(items: CartItemInput[], couponCode?: string, deliveryEmail?: string) {
   console.log('[Checkout] Iniciando processamento do carrinho...', { itemsCount: items?.length, couponCode });
   try {
     if (!items || items.length === 0) {
@@ -91,7 +91,7 @@ export async function processCartPurchase(items: CartItemInput[], couponCode?: s
         // For digital products we use placeholder data — Stylepay requires valid formats
         document: '12345678909', // Valid-looking placeholder (or collect from user)
         phoneNumber: '11999999999', // Valid format required by Stylepay
-        email: currentUser.email,
+        email: deliveryEmail || currentUser.email,
         address: {
           street: 'Rua Digital',
           number: '0',
@@ -134,6 +134,7 @@ export async function processCartPurchase(items: CartItemInput[], couponCode?: s
         pixCode: qrcode,
         stylepayPaymentId: payment_id,
         pixQrcodeImage: qrcode_image,
+        deliveryEmail: deliveryEmail || currentUser.email,
       });
 
       // 3. Insert Items

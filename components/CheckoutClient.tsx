@@ -13,6 +13,7 @@ export default function CheckoutClient({ user }: { user: any }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [email, setEmail] = useState(user?.email || '');
   const router = useRouter();
 
   // Coupon state
@@ -73,7 +74,7 @@ export default function CheckoutClient({ user }: { user: any }) {
 
     try {
       const itemsPayload = items.map(i => ({ productId: i.product.id, quantity: i.quantity }));
-      const response = await processCartPurchase(itemsPayload, appliedCoupon?.code);
+      const response = await processCartPurchase(itemsPayload, appliedCoupon?.code, email);
 
       if (response.success && response.orderId) {
         clearCart();
@@ -151,7 +152,13 @@ export default function CheckoutClient({ user }: { user: any }) {
               </div>
               <div className="space-y-2">
                 <label className="text-sm text-gray-400 ml-1">E-mail para entrega</label>
-                <input type="email" readOnly value={user?.email || ''} className="w-full bg-[#111] border border-[#222] rounded-xl p-4 text-white outline-none cursor-not-allowed opacity-60 focus:border-primary/50 transition-all" />
+                <input 
+                  type="email" 
+                  value={email} 
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="exemplo@email.com"
+                  className="w-full bg-[#111] border border-[#222] rounded-xl p-4 text-white outline-none focus:border-primary/50 transition-all" 
+                />
               </div>
             </div>
             <p className="text-xs text-gray-500 mt-4 flex items-center gap-2">
