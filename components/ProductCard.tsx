@@ -1,17 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { Zap, ShoppingBag } from 'lucide-react';
+import { Zap, Plus, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Product } from '@/db/schema';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
-
 import Link from 'next/link';
 
 export default function ProductCard({ product }: { product: Product }) {
   const router = useRouter();
   const { addToCart } = useCart();
+  const [isAdded, setIsAdded] = useState(false);
 
   const handleBuyNow = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -19,6 +19,16 @@ export default function ProductCard({ product }: { product: Product }) {
     if (product.stock > 0) {
       addToCart(product, 1, false);
       router.push('/checkout');
+    }
+  };
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (product.stock > 0 && !isAdded) {
+      addToCart(product, 1, false);
+      setIsAdded(true);
+      setTimeout(() => setIsAdded(false), 2000);
     }
   };
 
@@ -82,18 +92,39 @@ export default function ProductCard({ product }: { product: Product }) {
             </span>
           </div>
           
-          <button 
-            onClick={handleBuyNow}
-            disabled={product.stock <= 0}
-            className={`w-full py-4 flex items-center justify-center gap-3 rounded-2xl transition-all duration-300 font-black uppercase italic tracking-widest text-xs ${
-              product.stock > 0 
-              ? 'btn-stardust text-white cursor-pointer shadow-[0_10px_25px_rgba(59,130,246,0.2)] hover:shadow-[0_15px_35px_rgba(59,130,246,0.4)] hover:-translate-y-1' 
-              : 'bg-[#111] text-gray-700 cursor-not-allowed border border-white/5'
-            }`}
-          >
-            <Zap className="w-4 h-4" />
-            Comprar Agora
-          </button>
+          <div className="flex gap-2.5">
+            <button 
+              onClick={handleBuyNow}
+              disabled={product.stock <= 0}
+              className={`flex-[3] py-4 flex items-center justify-center gap-3 rounded-2xl transition-all duration-300 font-black uppercase italic tracking-widest text-[11px] ${
+                product.stock > 0 
+                ? 'btn-stardust text-white cursor-pointer shadow-[0_10px_25px_rgba(59,130,246,0.2)] hover:shadow-[0_15px_35px_rgba(59,130,246,0.4)] hover:-translate-y-1' 
+                : 'bg-[#111] text-gray-700 cursor-not-allowed border border-white/5'
+              }`}
+            >
+              <Zap className="w-3.5 h-3.5" />
+              Comprar Agora
+            </button>
+
+            <button 
+              onClick={handleAddToCart}
+              disabled={product.stock <= 0}
+              title="Adicionar ao Carrinho"
+              className={`flex-1 py-4 flex items-center justify-center rounded-2xl transition-all duration-500 border ${
+                product.stock > 0 
+                ? isAdded 
+                  ? 'bg-emerald-500 text-white border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.4)] scale-105' 
+                  : 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-primary/50 hover:-translate-y-1' 
+                : 'bg-[#111] text-gray-700 cursor-not-allowed border border-white/5'
+              }`}
+            >
+              {isAdded ? (
+                <Check className="w-5 h-5 animate-in zoom-in duration-300" strokeWidth={3} />
+              ) : (
+                <Plus className="w-5 h-5" strokeWidth={2.5} />
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -68,36 +68,42 @@ export default async function ProfilePage() {
           {userOrdersList.map((order) => (
             <div key={order.id} className="glass-card rounded-[2rem] p-5 sm:p-8 border border-white/5 hover:border-white/10 transition-all">
               
-              {/* Header Mobile: ID + Status no topo, Data e Total abaixo */}
-              <div className="flex flex-col gap-4 mb-6 pb-6 border-b border-white/5 sm:hidden">
-                <div className="flex items-center justify-between">
+              {/* HEADER MOBILE (Até 768px) - Garantindo visibilidade total */}
+              <div className="sm:hidden flex flex-col gap-3 mb-6 pb-6 border-b border-white/5">
+                {/* Linha 1: ID e Status lado a lado */}
+                <div className="flex justify-between items-center w-full">
                   <div>
-                    <p className="text-[9px] text-gray-600 font-black uppercase tracking-widest mb-0.5">ID DO PEDIDO</p>
+                    <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1">ID DO PEDIDO</p>
                     <p className="text-sm font-mono text-primary font-bold">#{order.id.split('-')[0].toUpperCase()}</p>
                   </div>
-                  <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border
-                    ${order.status === 'PAID' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
-                      order.status === 'PENDING' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' : 
-                      'bg-red-500/10 text-red-500 border-red-500/20'}`}
+                  <div className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border shadow-sm
+                    ${order.status === 'PAID' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' : 
+                      order.status === 'PENDING' ? 'bg-yellow-400/20 text-yellow-400 border-yellow-400/40' : 
+                      'bg-red-500/20 text-red-400 border-red-500/40'}`}
+                    style={{ display: 'inline-block !important' }}
                   >
-                    {order.status === 'PAID' ? 'Pago' : order.status === 'PENDING' ? 'Pendente' : 'Cancelado'}
+                    {order.status === 'PAID' ? 'PAGO' : order.status === 'PENDING' ? 'PENDENTE' : 'CANCELADO'}
                   </div>
                 </div>
-                <div className="flex items-center justify-between bg-white/[0.02] p-3 rounded-xl border border-white/5">
+
+                {/* Linha 2: Data e Total lado a lado */}
+                <div className="flex justify-between items-center w-full pt-2 opacity-90">
                   <div>
-                    <p className="text-[9px] text-gray-600 font-black uppercase tracking-widest mb-0.5">DATA</p>
-                    <p className="text-xs font-bold text-gray-300">
+                    <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1">DATA</p>
+                    <p className="text-[14px] font-bold text-gray-200">
                       {order.createdAt ? new Date(order.createdAt).toLocaleDateString('pt-BR') : '---'}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[9px] text-gray-600 font-black uppercase tracking-widest mb-0.5">TOTAL</p>
-                    <p className="text-base font-black text-white italic">R$ {Number(order.totalAmount).toFixed(2).replace('.', ',')}</p>
+                    <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1">TOTAL</p>
+                    <p className="text-[16px] font-black text-white" style={{ display: 'block !important' }}>
+                      R$ {Number(order.totalAmount).toFixed(2).replace('.', ',')}
+                    </p>
                   </div>
                 </div>
               </div>
 
-              {/* Header Desktop: Todos os dados em linha */}
+              {/* HEADER DESKTOP (Acima de 768px) */}
               <div className="hidden sm:grid grid-cols-4 gap-8 mb-8 pb-8 border-b border-white/5">
                 <div>
                   <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1">ID DO PEDIDO</p>
@@ -125,8 +131,8 @@ export default async function ProfilePage() {
                 </div>
               </div>
 
-              {/* Lista de Produtos */}
-              <div className="space-y-3 sm:space-y-4">
+              {/* LISTA DE PRODUTOS */}
+              <div className="space-y-4">
                 <p className="text-[9px] text-gray-700 font-black uppercase tracking-[0.3em] mb-2 sm:hidden">ITENS DO PEDIDO</p>
                 {order.items.map((item) => (
                   <div key={item.id} className="flex items-center gap-4 sm:gap-5 p-3 sm:p-4 bg-white/[0.02] border border-white/5 rounded-xl sm:rounded-2xl group hover:bg-white/[0.04] transition-all">
