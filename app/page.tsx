@@ -19,17 +19,7 @@ export default async function Home({
       <section className="relative w-full min-h-screen flex flex-col items-center justify-center px-4 py-24">
 
         {/* ── Background: animated grid + glows ── */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(59,130,246,0.06) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(59,130,246,0.06) 1px, transparent 1px)
-            `,
-            backgroundSize: '48px 48px',
-          }}
-        />
+
         <div
           aria-hidden
           className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 w-[900px] h-[500px] rounded-full -z-10"

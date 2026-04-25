@@ -40,7 +40,9 @@ export default function SupportDropdown() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-72 bg-black border border-white/10 rounded-2xl overflow-hidden z-[100] animate-in fade-in zoom-in duration-200 shadow-[0_20px_50px_rgba(0,0,0,1)]">
+        <>
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] sm:hidden" onClick={() => setIsOpen(false)} />
+          <div className="fixed inset-x-4 top-24 sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-3 sm:w-[380px] bg-black border border-white/10 rounded-2xl overflow-hidden z-[100] animate-in fade-in zoom-in duration-200 shadow-[0_20px_50px_rgba(0,0,0,1)] max-h-[calc(100vh-120px)] overflow-y-auto overscroll-contain">
           {/* Header */}
           <div className="px-5 py-4 border-b border-white/5 bg-black">
 
@@ -145,6 +147,7 @@ export default function SupportDropdown() {
           </div>
 
         </div>
+      </>
       )}
 
 
