@@ -43,13 +43,7 @@ export default async function Home({
         {/* ── Main headline: oversized split layout ── */}
         <div className="relative w-full max-w-6xl mx-auto">
 
-          {/* Big decorative number */}
-          <span
-            aria-hidden
-            className="absolute -top-10 -left-4 md:-left-10 text-[10rem] md:text-[16rem] font-black text-white/[0.03] leading-none select-none pointer-events-none"
-          >
-            #1
-          </span>
+
 
           <h1 className="relative text-center font-black tracking-tighter leading-[0.88] uppercase mb-8">
             {/* Row 1 */}
