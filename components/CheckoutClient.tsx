@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import { useCart } from '@/contexts/CartContext';
-import { ShieldCheck, Ticket, Check, Minus, Plus, X, Loader2, Zap, Tag, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, Ticket, Check, Minus, Plus, X, Loader2, Zap, Tag, CheckCircle2, Home } from 'lucide-react';
 import { processCartPurchase } from '@/app/actions/cart-checkout';
 import { validateCoupon } from '@/app/actions/coupons';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function CheckoutClient({ user }: { user: any }) {
   const { items, updateQuantity, removeFromCart, totalPrice, clearCart } = useCart();
@@ -92,10 +93,16 @@ export default function CheckoutClient({ user }: { user: any }) {
   };
 
   return (
-    <div className="max-w-[1440px] mx-auto px-4 py-12 lg:py-20 mt-16">
+    <div className="max-w-[1440px] mx-auto px-4 py-8 lg:py-12 mt-16">
       <div className="mb-10">
-        <h1 className="text-4xl font-bold text-white tracking-tight">Checkout</h1>
-        <p className="text-gray-400 text-sm mt-2">Início &gt; Checkout &gt; Pagamento</p>
+        <div className="flex items-center gap-2 text-sm font-medium text-gray-500 mb-4">
+           <Link href="/" className="hover:text-primary flex items-center gap-2 transition-colors">
+              <Home className="w-4 h-4" /> Início
+           </Link>
+           <span>/</span>
+           <span className="text-white font-bold">Checkout</span>
+        </div>
+        <h1 className="text-4xl font-bold text-white tracking-tight">Finalizar Compra</h1>
       </div>
 
       <div className="flex flex-col xl:flex-row gap-10 items-start">
@@ -203,9 +210,9 @@ export default function CheckoutClient({ user }: { user: any }) {
 
         {/* Coluna Direita: Resumo */}
         <div className="w-full xl:w-[480px] shrink-0 lg:sticky lg:top-24">
-          <div className="bg-[#0A0A0A] border border-[#222] rounded-2xl p-8 shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
+          <div className="bg-[#0A0A0A] border border-[#222] rounded-2xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
             
-            <div className="flex items-center justify-between mb-8 pb-5 border-b border-[#222]">
+            <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#222]">
               <h2 className="text-xl font-bold text-white tracking-tight">Resumo do pedido</h2>
               <div className="flex items-center gap-2 text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-full uppercase tracking-widest">
                 <ShieldCheck className="w-4 h-4" />
@@ -215,37 +222,38 @@ export default function CheckoutClient({ user }: { user: any }) {
 
             <div className="space-y-6 mb-8 max-h-[450px] overflow-y-auto pr-3 custom-scrollbar">
               {items.map((item) => (
-                <div key={item.product.id} className="flex gap-5 group">
-                  <div className="w-20 h-20 bg-[#111] rounded-2xl overflow-hidden shrink-0 border border-[#222] group-hover:border-primary/30 transition-colors">
+                <div key={item.product.id} className="flex gap-4 group items-center">
+                  <div className="w-14 h-14 bg-[#111] rounded-xl overflow-hidden shrink-0 border border-[#222] group-hover:border-primary/30 transition-colors">
                     {item.product.imageUrl ? (
                       <img src={item.product.imageUrl} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                     ) : (
-                      <span className="text-[10px] text-gray-600 h-full flex items-center justify-center">Sem foto</span>
+                      <span className="text-[10px] text-gray-600 h-full flex items-center justify-center uppercase">No pix</span>
                     )}
                   </div>
-                  <div className="flex-1 flex flex-col justify-center py-1">
-                    <h3 className="text-sm font-black text-white uppercase line-clamp-1 mb-1 group-hover:text-primary transition-colors">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-xs font-black text-white uppercase truncate mb-0.5 group-hover:text-primary transition-colors">
                       {item.product.name}
                     </h3>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-gray-500">Valor un.: R$ {Number(item.product.price).toFixed(2).replace('.', ',')}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] text-gray-500">R$ {Number(item.product.price).toFixed(2).replace('.', ',')}</span>
+                      <span className="text-[10px] text-gray-700">×</span>
+                      <span className="text-[10px] font-bold text-white">{item.quantity}</span>
                     </div>
                   </div>
                   
-                  <div className="flex flex-col items-end justify-center gap-3">
-                    <div className="flex items-center gap-2 bg-[#111] border border-[#222] rounded-xl p-1 shadow-inner">
-                      <button onClick={() => updateQuantity(item.product.id, item.quantity - 1)} className="w-7 h-7 flex items-center justify-center hover:bg-[#222] rounded-lg text-gray-400 hover:text-white transition-all active:scale-90">
-                        <Minus className="w-3.5 h-3.5" />
+                  <div className="flex flex-col items-end gap-1.5">
+                    <div className="flex items-center gap-1 bg-[#111] border border-[#222] rounded-lg p-0.5 shadow-inner">
+                      <button onClick={() => updateQuantity(item.product.id, item.quantity - 1)} className="w-6 h-6 flex items-center justify-center hover:bg-[#222] rounded-md text-gray-400 hover:text-white transition-all active:scale-90">
+                        <Minus className="w-3 h-3" />
                       </button>
-                      <span className="text-sm font-bold text-white w-6 text-center">{item.quantity}</span>
-                      <button onClick={() => updateQuantity(item.product.id, item.quantity + 1)} className="w-7 h-7 flex items-center justify-center hover:bg-[#222] rounded-lg text-gray-400 hover:text-white transition-all active:scale-90">
-                        <Plus className="w-3.5 h-3.5" />
+                      <button onClick={() => updateQuantity(item.product.id, item.quantity + 1)} className="w-6 h-6 flex items-center justify-center hover:bg-[#222] rounded-md text-gray-400 hover:text-white transition-all active:scale-90">
+                        <Plus className="w-3 h-3" />
                       </button>
-                      <button onClick={() => removeFromCart(item.product.id)} className="w-7 h-7 flex items-center justify-center hover:bg-red-500/10 rounded-lg text-gray-500 hover:text-red-500 transition-all ml-1 border-l border-[#222] active:scale-90">
-                        <X className="w-3.5 h-3.5" />
+                      <button onClick={() => removeFromCart(item.product.id)} className="w-6 h-6 flex items-center justify-center hover:bg-red-500/10 rounded-md text-gray-500 hover:text-red-500 transition-all ml-0.5 border-l border-[#222] active:scale-90">
+                        <X className="w-3 h-3" />
                       </button>
                     </div>
-                    <span className="text-lg font-black text-white tracking-tight">
+                    <span className="text-sm font-black text-white tracking-tight">
                       R$ {(Number(item.product.price) * item.quantity).toFixed(2).replace('.', ',')}
                     </span>
                   </div>
@@ -302,26 +310,26 @@ export default function CheckoutClient({ user }: { user: any }) {
               )}
             </div>
 
-            <div className="space-y-4 pt-6 border-t border-[#222]">
-              <div className="flex justify-between text-sm text-gray-400">
-                <span className="font-medium">Subtotal de itens</span>
-                <span className="font-bold">R$ {totalPrice.toFixed(2).replace('.', ',')}</span>
+            <div className="space-y-2 pt-4 border-t border-[#222]">
+              <div className="flex justify-between text-xs text-gray-400">
+                <span className="font-medium">Subtotal</span>
+                <span className="font-bold text-gray-300">R$ {totalPrice.toFixed(2).replace('.', ',')}</span>
               </div>
               {appliedCoupon && (
-                <div className="flex justify-between text-sm text-emerald-400">
-                  <span className="font-medium flex items-center gap-2">
-                    <Tag className="w-3 h-3" /> Desconto ({appliedCoupon.code})
+                <div className="flex justify-between text-xs text-emerald-400">
+                  <span className="font-medium flex items-center gap-1.5">
+                    <Tag className="w-3 h-3" /> Cupom ({appliedCoupon.code})
                   </span>
                   <span className="font-black">- R$ {discount.toFixed(2).replace('.', ',')}</span>
                 </div>
               )}
-              <div className="flex justify-between text-sm text-gray-400">
-                <span className="font-medium">Taxas de processamento</span>
-                <span className="text-green-400 font-bold uppercase text-[10px] bg-green-500/10 px-2 py-0.5 rounded">Grátis</span>
+              <div className="flex justify-between text-xs text-gray-400">
+                <span className="font-medium">Processamento</span>
+                <span className="text-green-400 font-bold uppercase text-[9px] bg-green-500/10 px-1.5 py-0.5 rounded">Grátis</span>
               </div>
-              <div className="flex justify-between text-2xl font-black text-white pt-4 border-t border-dashed border-[#333]">
+              <div className="flex justify-between text-xl font-black text-white pt-3 border-t border-dashed border-[#333] mt-2">
                 <span className="tracking-tighter">TOTAL</span>
-                <span className="text-primary shadow-[0_0_20px_rgba(59,130,246,0.1)]">R$ {finalPrice.toFixed(2).replace('.', ',')}</span>
+                <span className="text-primary">R$ {finalPrice.toFixed(2).replace('.', ',')}</span>
               </div>
               <p className="text-[10px] text-center text-gray-500 mt-4 font-medium uppercase tracking-widest">
                 Aprovação via Pix em segundos

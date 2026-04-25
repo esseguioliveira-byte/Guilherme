@@ -34,7 +34,7 @@ export default function RegisterForm() {
           id="email"
           type="email"
           name="email"
-          placeholder="seu@email.com"
+          placeholder="exemplo@bahiastore.com"
           required
           className="w-full bg-[#111] border border-[#333] rounded-lg p-3 text-white focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
         />

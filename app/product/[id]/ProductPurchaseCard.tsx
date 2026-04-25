@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ShoppingCart, Check, Plus, Circle, CheckCircle2 } from 'lucide-react';
+import { ShoppingCart, Check, Plus, Circle, CheckCircle2, ArrowRight, Store, Zap, X } from 'lucide-react';
 import type { Product } from '@/db/schema';
 import { useCart } from '@/contexts/CartContext';
 
@@ -15,17 +15,71 @@ export default function ProductPurchaseCard({ product, subProducts = [] }: Produ
   const { addToCart } = useCart();
   const router = useRouter();
   
-  // All available options: the main product + any sub-products
   const options = [product, ...subProducts];
   const [selectedProduct, setSelectedProduct] = useState<Product>(product);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const handleAddToCart = () => {
+    addToCart(selectedProduct, 1, false);
+    setShowConfirm(true);
+  };
 
   const handleBuyNow = () => {
-    addToCart(selectedProduct, 1, false); // Add without opening drawer
+    addToCart(selectedProduct, 1, false);
     router.push('/checkout');
   };
 
+  const handleGoToCheckout = () => {
+    setShowConfirm(false);
+    router.push('/checkout');
+  };
+
+  const handleContinueShopping = () => {
+    setShowConfirm(false);
+  };
+
   return (
-    <div className="bg-[#0A0A0A] border border-[#222] rounded-[2rem] p-6 shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
+    <div className="bg-[#0A0A0A] border border-[#222] rounded-[2rem] p-6 shadow-[0_10px_40px_rgba(0,0,0,0.5)] relative overflow-hidden">
+      
+      {/* ✅ Added-to-cart confirmation overlay */}
+      {showConfirm && (
+        <div className="absolute inset-0 z-20 bg-[#0A0A0A]/95 backdrop-blur-sm rounded-[2rem] flex flex-col items-center justify-center gap-6 p-8 animate-in fade-in duration-300">
+          <button
+            onClick={() => setShowConfirm(false)}
+            className="absolute top-4 right-4 p-2 text-gray-500 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+
+          <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.3)]">
+            <CheckCircle2 className="w-8 h-8 text-emerald-400" />
+          </div>
+
+          <div className="text-center">
+            <p className="text-lg font-black text-white mb-1">Adicionado ao carrinho!</p>
+            <p className="text-sm text-gray-500 font-medium line-clamp-1">{selectedProduct.name}</p>
+          </div>
+
+          <div className="w-full space-y-3">
+            <button
+              onClick={handleGoToCheckout}
+              className="w-full bg-primary hover:bg-blue-600 text-white font-black py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] flex items-center justify-center gap-2 text-sm uppercase tracking-wider"
+            >
+              <Zap className="w-4 h-4" />
+              Ir para Checkout
+              <ArrowRight className="w-4 h-4" />
+            </button>
+            <button
+              onClick={handleContinueShopping}
+              className="w-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-wider"
+            >
+              <Store className="w-4 h-4 text-gray-400" />
+              Continuar Comprando
+            </button>
+          </div>
+        </div>
+      )}
+
       <h1 className="text-2xl font-bold text-white mb-4 uppercase tracking-tight flex items-center gap-2" style={{ fontFamily: 'var(--font-jakarta)' }}>
         {selectedProduct.name}
       </h1>
@@ -87,24 +141,24 @@ export default function ProductPurchaseCard({ product, subProducts = [] }: Produ
         </div>
       )}
 
-      {/* Add to Cart Buttons */}
+      {/* Action Buttons */}
       <div className="space-y-3 pt-2">
         <button 
           onClick={handleBuyNow}
           disabled={selectedProduct.stock <= 0}
-          className="w-full bg-primary hover:bg-blue-600 disabled:bg-[#222] disabled:text-gray-500 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] disabled:shadow-none flex items-center justify-center gap-2"
+          className="w-full bg-primary hover:bg-blue-600 disabled:bg-[#222] disabled:text-gray-500 disabled:cursor-not-allowed text-white font-black py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] disabled:shadow-none flex items-center justify-center gap-2 uppercase tracking-wider text-sm"
         >
-          <ShoppingCart className="w-5 h-5" />
+          <Zap className="w-4 h-4" />
           Comprar Agora
         </button>
         
         <button 
-          onClick={() => addToCart(selectedProduct, 1)}
+          onClick={handleAddToCart}
           disabled={selectedProduct.stock <= 0}
-          className="w-full bg-[#111] hover:bg-[#1a1a1a] disabled:opacity-50 disabled:cursor-not-allowed text-white border border-[#333] hover:border-[#444] font-medium py-4 rounded-xl transition-all flex items-center justify-center gap-2"
+          className="w-full bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed text-white border border-white/10 hover:border-primary/50 font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-sm"
         >
-           <Plus className="w-4 h-4" />
-           Adicionar ao carrinho
+          <ShoppingCart className="w-4 h-4" />
+          Adicionar ao Carrinho
         </button>
       </div>
     </div>

@@ -46,7 +46,7 @@ export default async function AffiliatesPage() {
   const faqs = [
     { q: "Como faço para me cadastrar?", a: "Basta clicar no botão 'Quero ser Afiliado' e preencher o formulário. Sua conta será analisada em até 24h." },
     { q: "Qual o valor mínimo para saque?", a: "O valor mínimo para solicitar o resgate de suas comissões é de apenas R$ 50,00." },
-    { q: "Posso fazer anúncios (Google Ads)?", a: "Sim, permitimos anúncios em redes de busca, exceto para palavras-chave de marca própria (DigiStore)." },
+    { q: "Posso fazer anúncios (Google Ads)?", a: "Sim, permitimos anúncios em redes de busca, exceto para palavras-chave de marca própria (Bahia Store)." },
     { q: "Como as vendas são rastreadas?", a: "Utilizamos cookies de 30 dias. Se o cliente clicar no seu link e comprar em até um mês, a comissão é sua." }
   ];
 
@@ -61,7 +61,7 @@ export default async function AffiliatesPage() {
             Ganhe até <span className="text-primary italic">20% de comissão</span>
           </h1>
           <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-            Faça parte do programa de afiliados mais lucrativo do mercado digital. Indique a <span className="text-white font-bold">BAHIA&apos;S STORE</span> e transforme cliques em dinheiro vivo.
+            Faça parte do programa de afiliados mais lucrativo do mercado digital. Indique a <span className="text-white font-bold uppercase">Bahia Store</span> e transforme cliques em dinheiro vivo.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <AffiliateHeroButton isAffiliate={isAffiliate} />

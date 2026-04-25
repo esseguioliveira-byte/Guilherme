@@ -2,9 +2,11 @@ import { db } from '@/db';
 import { products } from '@/db/schema';
 import { eq, and, ne, isNull } from 'drizzle-orm';
 import { notFound } from 'next/navigation';
-import { ShieldCheck, Zap, CreditCard, FileText, Sparkles, Layers } from 'lucide-react';
+import { ShieldCheck, Zap, CreditCard, FileText, Sparkles, Layers, Home } from 'lucide-react';
 import ProductPurchaseCard from './ProductPurchaseCard';
 import ProductCard from '@/components/ProductCard';
+import Navbar from '@/components/Navbar';
+import Link from 'next/link';
 
 export default async function ProductDetailsPage({ params }: { params: { id: string } }) {
   const { id } = await params;
@@ -37,7 +39,18 @@ export default async function ProductDetailsPage({ params }: { params: { id: str
 
 
   return (
-    <div className="min-h-screen pt-24 pb-20 px-4 max-w-7xl mx-auto space-y-16">
+    <div className="min-h-screen pb-20 px-4">
+      <Navbar />
+      
+      <div className="max-w-7xl mx-auto pt-32 space-y-16">
+        {/* Navigation / Header */}
+        <div className="flex items-center gap-2 text-sm font-medium text-gray-500 mb-8">
+           <Link href="/" className="hover:text-primary flex items-center gap-2 transition-colors">
+              <Home className="w-4 h-4" /> Início
+           </Link>
+           <span>/</span>
+           <span className="text-white font-bold">{product.name}</span>
+        </div>
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Left Column */}
         <div className="flex-1 space-y-6">
@@ -117,6 +130,7 @@ export default async function ProductDetailsPage({ params }: { params: { id: str
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
