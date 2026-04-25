@@ -83,7 +83,7 @@ export default async function ProductGrid({ currentCategory }: { currentCategory
               {group.name}
               <div className="h-[1px] flex-grow bg-gradient-to-r from-white/10 to-transparent" />
             </h3>
-            <div data-stagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div data-stagger className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               {group.products.map((product) => (
                 <div key={product.id} data-scroll="up">
                   <ProductCard product={product as any} />
