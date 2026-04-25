@@ -64,18 +64,48 @@ export default async function ProfilePage() {
           </Link>
         </div>
       ) : (
-        <div className="grid gap-4 sm:gap-6">
+        <div className="grid gap-6">
           {userOrdersList.map((order) => (
-            <div key={order.id} className="glass-card rounded-[1.5rem] sm:rounded-[2rem] p-4 sm:p-8 border border-white/5 hover:border-white/10 transition-all">
-              <div className="grid grid-cols-2 sm:flex sm:items-center sm:justify-between gap-y-4 sm:gap-6 mb-5 sm:mb-6 pb-5 sm:pb-6 border-b border-white/5">
-                <div>
-                  <p className="text-[9px] text-gray-600 font-black uppercase tracking-widest mb-0.5">ID</p>
-                  <p className="text-xs font-mono text-primary font-bold">#{order.id.split('-')[0].toUpperCase()}</p>
+            <div key={order.id} className="glass-card rounded-[2rem] p-5 sm:p-8 border border-white/5 hover:border-white/10 transition-all">
+              
+              {/* Header Mobile: ID + Status no topo, Data e Total abaixo */}
+              <div className="flex flex-col gap-4 mb-6 pb-6 border-b border-white/5 sm:hidden">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[9px] text-gray-600 font-black uppercase tracking-widest mb-0.5">ID DO PEDIDO</p>
+                    <p className="text-sm font-mono text-primary font-bold">#{order.id.split('-')[0].toUpperCase()}</p>
+                  </div>
+                  <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border
+                    ${order.status === 'PAID' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
+                      order.status === 'PENDING' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' : 
+                      'bg-red-500/10 text-red-500 border-red-500/20'}`}
+                  >
+                    {order.status === 'PAID' ? 'Pago' : order.status === 'PENDING' ? 'Pendente' : 'Cancelado'}
+                  </div>
                 </div>
-                
-                <div className="text-right sm:text-left">
-                  <p className="text-[9px] text-gray-600 font-black uppercase tracking-widest mb-0.5">Status</p>
-                  <div className={`inline-flex px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border
+                <div className="flex items-center justify-between bg-white/[0.02] p-3 rounded-xl border border-white/5">
+                  <div>
+                    <p className="text-[9px] text-gray-600 font-black uppercase tracking-widest mb-0.5">DATA</p>
+                    <p className="text-xs font-bold text-gray-300">
+                      {order.createdAt ? new Date(order.createdAt).toLocaleDateString('pt-BR') : '---'}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[9px] text-gray-600 font-black uppercase tracking-widest mb-0.5">TOTAL</p>
+                    <p className="text-base font-black text-white italic">R$ {Number(order.totalAmount).toFixed(2).replace('.', ',')}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Header Desktop: Todos os dados em linha */}
+              <div className="hidden sm:grid grid-cols-4 gap-8 mb-8 pb-8 border-b border-white/5">
+                <div>
+                  <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1">ID DO PEDIDO</p>
+                  <p className="text-sm font-mono text-primary font-bold">#{order.id.split('-')[0].toUpperCase()}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1">STATUS</p>
+                  <div className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border
                     ${order.status === 'PAID' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
                       order.status === 'PENDING' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' : 
                       'bg-red-500/10 text-red-500 border-red-500/20'}`}
@@ -83,21 +113,21 @@ export default async function ProfilePage() {
                     {order.status === 'PAID' ? 'Aprovado' : order.status === 'PENDING' ? 'Pendente' : 'Cancelado'}
                   </div>
                 </div>
-
                 <div>
-                  <p className="text-[9px] text-gray-600 font-black uppercase tracking-widest mb-0.5">Data</p>
-                  <p className="text-xs font-bold text-gray-300">
+                  <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1">DATA</p>
+                  <p className="text-sm font-bold text-gray-300">
                     {order.createdAt ? new Date(order.createdAt).toLocaleDateString('pt-BR') : '---'}
                   </p>
                 </div>
-
                 <div className="text-right">
-                  <p className="text-[9px] text-gray-600 font-black uppercase tracking-widest mb-0.5">Total</p>
-                  <p className="text-sm sm:text-lg font-black text-white italic leading-tight">R$ {Number(order.totalAmount).toFixed(2).replace('.', ',')}</p>
+                  <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1">TOTAL</p>
+                  <p className="text-lg font-black text-white italic leading-tight">R$ {Number(order.totalAmount).toFixed(2).replace('.', ',')}</p>
                 </div>
               </div>
 
+              {/* Lista de Produtos */}
               <div className="space-y-3 sm:space-y-4">
+                <p className="text-[9px] text-gray-700 font-black uppercase tracking-[0.3em] mb-2 sm:hidden">ITENS DO PEDIDO</p>
                 {order.items.map((item) => (
                   <div key={item.id} className="flex items-center gap-4 sm:gap-5 p-3 sm:p-4 bg-white/[0.02] border border-white/5 rounded-xl sm:rounded-2xl group hover:bg-white/[0.04] transition-all">
                     <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[#050505] rounded-lg sm:rounded-xl flex-shrink-0 overflow-hidden border border-white/5">

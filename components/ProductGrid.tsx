@@ -70,8 +70,7 @@ export default async function ProductGrid({ currentCategory }: { currentCategory
     : groups;
 
   return (
-    <div className="w-full flex flex-col gap-16 pb-24" id="produtos">
-      <div className="pt-12"></div>
+    <div className="w-full flex flex-col gap-8 sm:gap-16 pb-24" id="produtos">
 
       {activeGroups.length === 0 ? (
         <div className="text-center py-24 text-gray-500">

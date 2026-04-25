@@ -16,7 +16,7 @@ export default async function Home({
       <Navbar />
 
       {/* ── HERO ── */}
-      <section className="relative w-full min-h-screen flex flex-col items-center justify-center px-4 py-24">
+      <section className="relative w-full min-h-[80vh] flex flex-col items-center justify-center px-4 py-16 sm:py-24">
 
         {/* ── Background: animated grid + glows ── */}
 
@@ -114,9 +114,9 @@ export default async function Home({
       </section>
 
       {/* ── FLOATING LOGOS CAROUSEL ── */}
-      <div className="w-full py-12 relative overflow-hidden">
+      <div className="w-full py-6 sm:py-12 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-10">
+          <div className="text-center mb-6 sm:mb-10">
             <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-gray-500 italic">
               Tudo que você gosta em um só lugar
             </span>
