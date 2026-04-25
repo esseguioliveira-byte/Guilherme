@@ -78,7 +78,13 @@ export default function UserDropdown({ userName, userImage, isAffiliate, isAdmin
                 Painel Admin
               </Link>
             )}
-
+            <button 
+              onClick={() => signOut({ callbackUrl: '/' })}
+              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-400 hover:bg-red-400/5 rounded-xl transition-colors font-bold border-t border-white/5 pt-3 mt-1"
+            >
+              <LogOut className="w-4 h-4" />
+              Sair da Conta
+            </button>
           </div>
         </div>
       )}
