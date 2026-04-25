@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Package, User, LayoutDashboard, DollarSign } from 'lucide-react';
+import { Package, User, LayoutDashboard, DollarSign, LogOut } from 'lucide-react';
 import Link from 'next/link';
+import { signOut } from 'next-auth/react';
 
 interface UserDropdownProps {
   userName: string;
