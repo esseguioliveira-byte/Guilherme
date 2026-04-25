@@ -194,7 +194,7 @@ export default function CheckoutClient({ user }: { user: any }) {
               </div>
               <input type="checkbox" className="hidden" checked={acceptedTerms} onChange={(e) => setAcceptedTerms(e.target.checked)} />
               <span className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors leading-relaxed">
-                Ao finalizar, você concorda com nossos <span className="text-white font-bold underline decoration-primary/30 underline-offset-4">termos de uso</span> e confirma que os dados de contato estão corretos para a entrega digital.
+                Ao finalizar, você concorda com nossos <Link href="/termos" className="text-white font-bold underline decoration-primary/30 underline-offset-4 hover:text-primary transition-colors">termos de uso</Link> e confirma que os dados de contato estão corretos para a entrega digital.
               </span>
             </label>
 

@@ -75,7 +75,7 @@ export async function processCartPurchase(items: CartItemInput[], couponCode?: s
       appliedCoupon = { id: couponResult.coupon.id, code: couponResult.coupon.code, discount: discountAmount };
     }
 
-    const finalTotal = Math.max(0, totalAmount - discountAmount);
+    const finalTotal = Number(Math.max(0, totalAmount - discountAmount).toFixed(2));
 
     // Build app base URL for webhook postback
     const appUrl = process.env.NEXTAUTH_URL || process.env.APP_URL || 'https://sualoja.com';
