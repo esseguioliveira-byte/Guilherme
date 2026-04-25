@@ -1,16 +1,17 @@
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { db } from '@/db';
-import { orders, orderItems, products, stockItems } from '@/db/schema';
+import { orders, orderItems, products, stockItems, users } from '@/db/schema';
 import { eq, desc, inArray } from 'drizzle-orm';
 import DeliveryItem from '@/components/profile/DeliveryItem';
-import { Package, ArrowRight, Terminal } from 'lucide-react';
+import { Package, ArrowRight, Terminal, DollarSign, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 
 export default async function ProfilePage() {
   const session = await auth();
   if (!session?.user?.id) redirect('/login');
 
+  const user = await db.select().from(users).where(eq(users.id, session.user.id)).then(res => res[0]);
   const rawOrders = await db.select().from(orders).where(eq(orders.userId, session.user.id)).orderBy(desc(orders.createdAt));
   
   const orderIds = rawOrders.map(o => o.id);
@@ -65,15 +66,16 @@ export default async function ProfilePage() {
       ) : (
         <div className="grid gap-4 sm:gap-6">
           {userOrdersList.map((order) => (
-            <div key={order.id} className="glass-card rounded-[1.5rem] sm:rounded-[2rem] p-5 sm:p-8 border border-white/5 hover:border-white/10 transition-all">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6 mb-5 sm:mb-6 pb-5 sm:pb-6 border-b border-white/5">
-                <div className="flex flex-wrap items-center justify-between sm:block gap-4">
-                  <div>
-                    <p className="text-[9px] sm:text-[10px] text-gray-600 font-black uppercase tracking-[0.2em] mb-1">ID DO PEDIDO</p>
-                    <p className="text-xs sm:text-sm font-mono text-primary font-bold">#{order.id.split('-')[0].toUpperCase()}</p>
-                  </div>
-                  
-                  <div className={`sm:hidden px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border
+            <div key={order.id} className="glass-card rounded-[1.5rem] sm:rounded-[2rem] p-4 sm:p-8 border border-white/5 hover:border-white/10 transition-all">
+              <div className="grid grid-cols-2 sm:flex sm:items-center sm:justify-between gap-y-4 sm:gap-6 mb-5 sm:mb-6 pb-5 sm:pb-6 border-b border-white/5">
+                <div>
+                  <p className="text-[9px] text-gray-600 font-black uppercase tracking-widest mb-0.5">ID</p>
+                  <p className="text-xs font-mono text-primary font-bold">#{order.id.split('-')[0].toUpperCase()}</p>
+                </div>
+                
+                <div className="text-right sm:text-left">
+                  <p className="text-[9px] text-gray-600 font-black uppercase tracking-widest mb-0.5">Status</p>
+                  <div className={`inline-flex px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border
                     ${order.status === 'PAID' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
                       order.status === 'PENDING' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' : 
                       'bg-red-500/10 text-red-500 border-red-500/20'}`}
@@ -82,24 +84,16 @@ export default async function ProfilePage() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between sm:justify-end gap-6 sm:gap-8">
-                  <div className="text-left sm:text-right">
-                    <p className="text-[9px] sm:text-[10px] text-gray-600 font-black uppercase tracking-[0.2em] mb-1">DATA</p>
-                    <p className="text-xs sm:text-sm font-bold text-gray-300">
-                      {order.createdAt ? new Date(order.createdAt).toLocaleDateString('pt-BR') : '---'}
-                    </p>
-                  </div>
-                  <div className="text-left sm:text-right">
-                    <p className="text-[9px] sm:text-[10px] text-gray-600 font-black uppercase tracking-[0.2em] mb-1">TOTAL</p>
-                    <p className="text-base sm:text-lg font-black text-white italic leading-tight">R$ {Number(order.totalAmount).toFixed(2).replace('.', ',')}</p>
-                  </div>
-                  <div className={`hidden sm:block px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border
-                    ${order.status === 'PAID' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
-                      order.status === 'PENDING' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' : 
-                      'bg-red-500/10 text-red-500 border-red-500/20'}`}
-                  >
-                    {order.status === 'PAID' ? 'Aprovado' : order.status === 'PENDING' ? 'Pendente' : 'Cancelado'}
-                  </div>
+                <div>
+                  <p className="text-[9px] text-gray-600 font-black uppercase tracking-widest mb-0.5">Data</p>
+                  <p className="text-xs font-bold text-gray-300">
+                    {order.createdAt ? new Date(order.createdAt).toLocaleDateString('pt-BR') : '---'}
+                  </p>
+                </div>
+
+                <div className="text-right">
+                  <p className="text-[9px] text-gray-600 font-black uppercase tracking-widest mb-0.5">Total</p>
+                  <p className="text-sm sm:text-lg font-black text-white italic leading-tight">R$ {Number(order.totalAmount).toFixed(2).replace('.', ',')}</p>
                 </div>
               </div>
 
@@ -110,7 +104,7 @@ export default async function ProfilePage() {
                        {item.product?.imageUrl && <img src={item.product.imageUrl} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" alt="" />}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-white font-bold truncate nasa-title text-[11px] sm:text-sm">{item.product?.name || 'Produto'}</p>
+                      <p className="text-white font-bold nasa-title text-[11px] sm:text-sm leading-tight mb-1">{item.product?.name || 'Produto'}</p>
                       <p className="text-[10px] sm:text-xs text-gray-500 font-medium">Qtd: {item.quantity} × R$ {Number(item.price).toFixed(2).replace('.', ',')}</p>
                       
                       {/* Entrega Automática */}
@@ -139,6 +133,35 @@ export default async function ProfilePage() {
           ))}
         </div>
       )}
+
+    {/* Botão Afiliado no Mobile */}
+    <div className="md:hidden mt-8">
+       <Link 
+          href={user?.isAffiliate ? "/profile/affiliate" : "/affiliates"} 
+          className={`flex items-center justify-between p-6 rounded-3xl group active:scale-95 transition-all border ${
+            user?.isAffiliate 
+              ? "bg-gradient-to-r from-primary/20 to-primary/5 border-primary/20" 
+              : "bg-gradient-to-r from-emerald-500/20 to-emerald-500/5 border-emerald-500/20"
+          }`}
+       >
+          <div>
+             <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${user?.isAffiliate ? "text-primary" : "text-emerald-400"}`}>
+               {user?.isAffiliate ? "Gestão" : "Oportunidade"}
+             </p>
+             <h3 className="text-lg font-black text-white uppercase italic">
+               {user?.isAffiliate ? "Painel Afiliado" : "Seja um Afiliado"}
+             </h3>
+             <p className="text-xs text-gray-500 font-medium">
+               {user?.isAffiliate ? "Gerencie suas vendas e lucros" : "Ganhe comissões indicando nossa loja!"}
+             </p>
+          </div>
+          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${
+            user?.isAffiliate ? "bg-primary/20 border-primary/30" : "bg-emerald-500/20 border-emerald-500/30"
+          }`}>
+             {user?.isAffiliate ? <TrendingUp className="w-6 h-6 text-primary" /> : <DollarSign className="w-6 h-6 text-emerald-400" />}
+          </div>
+       </Link>
     </div>
+  </div>
   );
 }
