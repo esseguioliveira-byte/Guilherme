@@ -1,9 +1,10 @@
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { db } from '@/db';
-import { orders, orderItems, products, stockItems, users } from '@/db/schema';
+import { orders, orderItems, products, stockItems, users, stockDeliveries } from '@/db/schema';
 import { eq, desc, inArray, aliasedTable } from 'drizzle-orm';
 import DeliveryItem from '@/components/profile/DeliveryItem';
+import RedeemButton from '@/components/profile/RedeemButton';
 import { Package, ArrowRight, Terminal, DollarSign, TrendingUp, Zap } from 'lucide-react';
 import Link from 'next/link';
 
@@ -33,21 +34,32 @@ export default async function ProfilePage() {
       .where(inArray(orderItems.orderId, orderIds));
 
     deliveredItems = await db
-      .select()
-      .from(stockItems)
-      .where(inArray(stockItems.orderId, orderIds));
+      .select({
+        stockItem: stockItems,
+        delivery: stockDeliveries
+      })
+      .from(stockDeliveries)
+      .leftJoin(stockItems, eq(stockDeliveries.stockItemId, stockItems.id))
+      .where(inArray(stockDeliveries.orderId, orderIds));
   }
 
   const userOrdersList = rawOrders.map(order => ({
     ...order,
     items: allItems
-      .filter(i => i.item.orderId === order.id)
-      .map(i => ({
-        ...i.item,
-        product: i.product,
-        imageUrl: i.product?.imageUrl || i.parent?.imageUrl,
-        delivered: deliveredItems.filter(d => d.productId === i.item.productId && d.orderId === order.id)
-      }))
+      .filter(i => i?.item?.orderId === order.id)
+      .map(i => {
+        if (!i || !i.item) return null;
+        return {
+          ...i.item,
+          product: i.product,
+          imageUrl: i.product?.imageUrl || i.parent?.imageUrl,
+          linkId: i.product?.parentId || i.product?.id,
+          delivered: deliveredItems
+            .filter(d => d.stockItem && d.delivery && i.item && d.stockItem.productId === i.item.productId && d.delivery.orderId === order.id)
+            .map(d => d.stockItem)
+        };
+      })
+      .filter((i): i is any => i !== null)
   }));
 
   return (
@@ -71,115 +83,160 @@ export default async function ProfilePage() {
       ) : (
         <div className="grid gap-6">
           {userOrdersList.map((order) => {
-            const OrderCardContent = (
-              <div className="p-5 sm:p-8">
-                {/* HEADER MOBILE (Até 768px) */}
-                <div className="sm:hidden flex flex-col gap-3 mb-6 pb-6 border-b border-white/5 w-full overflow-hidden">
-                  <div className="flex justify-between items-center w-full">
-                    <div>
-                      <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1">ID DO PEDIDO</p>
-                      <p className="text-sm font-mono text-primary font-bold">#{order.id.split('-')[0].toUpperCase()}</p>
+            return (
+              <div key={order.id} className="glass-card rounded-[2rem] border border-white/5 hover:border-white/10 transition-all overflow-hidden bg-white/[0.01]">
+                {/* Cabeçalho do Card - Link para o Pedido se PENDENTE */}
+                {order.status === 'PENDING' ? (
+                  <Link href={`/orders/${order.id}`} className="block hover:bg-white/[0.02] transition-colors p-5 sm:p-8 pb-4 sm:pb-4 border-b border-white/5 group/header">
+                    {/* HEADER MOBILE (Até 768px) */}
+                    <div className="sm:hidden flex flex-col gap-3 w-full overflow-hidden">
+                      <div className="flex justify-between items-center w-full">
+                        <div>
+                          <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1">ID DO PEDIDO</p>
+                          <p className="text-sm font-mono text-primary font-bold">#{order.id.split('-')[0].toUpperCase()}</p>
+                        </div>
+                        <div className="px-3 py-1.5 bg-yellow-400/20 text-yellow-400 border border-yellow-400/40 rounded-full text-[10px] font-black uppercase tracking-widest">
+                          PENDENTE
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center w-full pt-2 opacity-90">
+                        <div>
+                          <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1">DATA</p>
+                          <p className="text-[14px] font-bold text-gray-200">{order.createdAt ? new Date(order.createdAt).toLocaleDateString('pt-BR') : '---'}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1">TOTAL</p>
+                          <p className="text-[16px] font-black text-white italic">R$ {Number(order.totalAmount).toFixed(2).replace('.', ',')}</p>
+                        </div>
+                      </div>
                     </div>
-                    <div className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border shadow-sm
-                      ${order.status === 'PAID' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' : 
-                        order.status === 'PENDING' ? 'bg-yellow-400/20 text-yellow-400 border-yellow-400/40' : 
-                        'bg-red-500/20 text-red-400 border-red-500/40'}`}
-                    >
-                      {order.status === 'PAID' ? 'PAGO' : order.status === 'PENDING' ? 'PENDENTE' : 'CANCELADO'}
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center w-full pt-2 opacity-90">
-                    <div>
-                      <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1">DATA</p>
-                      <p className="text-[14px] font-bold text-gray-200">{order.createdAt ? new Date(order.createdAt).toLocaleDateString('pt-BR') : '---'}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1">TOTAL</p>
-                      <p className="text-[16px] font-black text-white">R$ {Number(order.totalAmount).toFixed(2).replace('.', ',')}</p>
-                    </div>
-                  </div>
-                </div>
 
-                {/* HEADER DESKTOP */}
-                <div className="hidden sm:grid grid-cols-4 gap-8 mb-8 pb-8 border-b border-white/5">
-                  <div>
-                    <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1">ID DO PEDIDO</p>
-                    <p className="text-sm font-mono text-primary font-bold">#{order.id.split('-')[0].toUpperCase()}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1">STATUS</p>
-                    <div className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border
-                      ${order.status === 'PAID' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
-                        order.status === 'PENDING' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' : 
-                        'bg-red-500/10 text-red-500 border-red-500/20'}`}
-                    >
-                      {order.status === 'PAID' ? 'Aprovado' : order.status === 'PENDING' ? 'Pendente' : 'Cancelado'}
+                    {/* HEADER DESKTOP */}
+                    <div className="hidden sm:grid grid-cols-4 gap-8">
+                      <div>
+                        <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1">ID DO PEDIDO</p>
+                        <p className="text-sm font-mono text-primary font-bold">#{order.id.split('-')[0].toUpperCase()}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1">STATUS</p>
+                        <div className="inline-flex px-3 py-1 bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 rounded-full text-[10px] font-black uppercase tracking-widest">
+                          Pendente
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1">DATA</p>
+                        <p className="text-sm font-bold text-gray-300">{order.createdAt ? new Date(order.createdAt).toLocaleDateString('pt-BR') : '---'}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1 group-hover:text-primary transition-colors">FINALIZAR PAGAMENTO</p>
+                        <p className="text-lg font-black text-white italic leading-tight">R$ {Number(order.totalAmount).toFixed(2).replace('.', ',')}</p>
+                      </div>
+                    </div>
+                  </Link>
+                ) : (
+                  <div className="p-5 sm:p-8 pb-4 sm:pb-4 border-b border-white/5">
+                    {/* HEADER MOBILE (Até 768px) */}
+                    <div className="sm:hidden flex flex-col gap-3 w-full overflow-hidden">
+                      <div className="flex justify-between items-center w-full">
+                        <div>
+                          <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1">ID DO PEDIDO</p>
+                          <p className="text-sm font-mono text-primary font-bold">#{order.id.split('-')[0].toUpperCase()}</p>
+                        </div>
+                        <div className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border
+                          ${order.status === 'PAID' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' : 'bg-red-500/20 text-red-400 border-red-500/40'}`}>
+                          {order.status === 'PAID' ? 'PAGO' : 'CANCELADO'}
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center w-full pt-2 opacity-90">
+                        <div>
+                          <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1">DATA</p>
+                          <p className="text-[14px] font-bold text-gray-200">{order.createdAt ? new Date(order.createdAt).toLocaleDateString('pt-BR') : '---'}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1">TOTAL</p>
+                          <p className="text-[16px] font-black text-white italic">R$ {Number(order.totalAmount).toFixed(2).replace('.', ',')}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* HEADER DESKTOP */}
+                    <div className="hidden sm:grid grid-cols-4 gap-8">
+                      <div>
+                        <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1">ID DO PEDIDO</p>
+                        <p className="text-sm font-mono text-primary font-bold">#{order.id.split('-')[0].toUpperCase()}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1">STATUS</p>
+                        <div className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border
+                          ${order.status === 'PAID' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
+                          {order.status === 'PAID' ? 'Aprovado' : 'Cancelado'}
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1">DATA</p>
+                        <p className="text-sm font-bold text-gray-300">{order.createdAt ? new Date(order.createdAt).toLocaleDateString('pt-BR') : '---'}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1 italic">VALOR TOTAL</p>
+                        <p className="text-lg font-black text-white italic leading-tight">R$ {Number(order.totalAmount).toFixed(2).replace('.', ',')}</p>
+                      </div>
                     </div>
                   </div>
-                  <div>
-                    <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1">DATA</p>
-                    <p className="text-sm font-bold text-gray-300">{order.createdAt ? new Date(order.createdAt).toLocaleDateString('pt-BR') : '---'}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1">TOTAL</p>
-                    <p className="text-lg font-black text-white italic leading-tight">R$ {Number(order.totalAmount).toFixed(2).replace('.', ',')}</p>
-                  </div>
-                </div>
+                )}
 
                 {/* LISTA DE PRODUTOS */}
-                <div className="space-y-4">
+                <div className="p-5 sm:p-8 pt-4 sm:pt-4 space-y-4">
                   <p className="text-[9px] text-gray-700 font-black uppercase tracking-[0.3em] mb-2 sm:hidden">ITENS DO PEDIDO</p>
-                  {order.items.map((item) => (
-                    <div key={item.id} className="flex items-center gap-4 sm:gap-5 p-3 sm:p-4 bg-white/[0.02] border border-white/5 rounded-xl sm:rounded-2xl group hover:bg-white/[0.04] transition-all">
-                      <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[#050505] rounded-lg sm:rounded-xl flex-shrink-0 overflow-hidden border border-white/5">
-                         {item.imageUrl && <img src={item.imageUrl} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" alt="" />}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-white font-bold nasa-title text-[11px] sm:text-sm leading-tight mb-1">{item.product?.name || 'Produto'}</p>
-                        <p className="text-[10px] sm:text-xs text-gray-500 font-medium">Qtd: {item.quantity} × R$ {Number(item.price).toFixed(2).replace('.', ',')}</p>
-                        
-                        {order.status === 'PAID' && item.delivered && item.delivered.length > 0 && (
-                          <div className="mt-3 sm:mt-4 space-y-2">
-                             <p className="text-[8px] sm:text-[9px] font-black uppercase text-primary flex items-center gap-2">
-                                <Terminal className="w-3 h-3" /> Sua Entrega:
-                             </p>
-                             <div className="space-y-2">
-                                {item.delivered.map((d: any) => (
-                                   <DeliveryItem key={d.id} content={d.content} />
-                                ))}
-                             </div>
-                          </div>
-                        )}
-                      </div>
-                      
-                      {order.status === 'PENDING' && (
-                        <div className="p-2.5 sm:p-3 bg-primary/10 text-primary rounded-lg sm:rounded-xl border border-primary/20">
-                          <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                  {order.items.map((item) => {
+                    const ProductItemContent = (
+                      <div className="flex items-center gap-4 sm:gap-5 p-3 sm:p-4 bg-white/[0.02] border border-white/5 rounded-xl sm:rounded-2xl group/item hover:bg-white/[0.04] transition-all h-full">
+                        <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[#050505] rounded-lg sm:rounded-xl flex-shrink-0 overflow-hidden border border-white/5">
+                           {item.imageUrl && <img src={item.imageUrl} className="w-full h-full object-cover opacity-80 group-hover/item:opacity-100 transition-opacity" alt="" />}
                         </div>
-                      )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white font-bold nasa-title text-[11px] sm:text-sm leading-tight mb-1 group-hover/item:text-primary transition-colors">{item.product?.name || 'Produto'}</p>
+                          <p className="text-[10px] sm:text-xs text-gray-500 font-medium">Qtd: {item.quantity} × R$ {Number(item.price).toFixed(2).replace('.', ',')}</p>
+                          
+                          {order.status === 'PAID' && (
+                            <div className="mt-3">
+                              <RedeemButton>
+                                <div className="space-y-3">
+                                  <p className="text-[8px] sm:text-[9px] font-black uppercase text-primary flex items-center gap-2 mb-2">
+                                    <Terminal className="w-3 h-3" /> Sua Entrega:
+                                  </p>
+                                  {item.delivered && item.delivered.length > 0 ? (
+                                    <div className="space-y-2">
+                                      {item.delivered.map((d: any) => (
+                                        <DeliveryItem key={d.id} content={d.content} />
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <div className="p-4 bg-white/5 border border-dashed border-white/10 rounded-xl text-center">
+                                      <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
+                                        Aguardando liberação de estoque...
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              </RedeemButton>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
 
-                      {order.status === 'PAID' && (
-                        <button className="px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-white rounded-lg sm:rounded-xl transition-all border border-emerald-500/20 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                          <Zap className="w-3 h-3" /> Resgatar
-                        </button>
-                      )}
-                    </div>
-                  ))}
+                    if (order.status === 'PENDING') {
+                      const variantParam = item.product?.parentId ? `?variant=${item.product.id}` : '';
+                      return (
+                        <Link key={item.id} href={`/product/${item.linkId}${variantParam}`} className="block transition-transform hover:scale-[1.01] active:scale-100">
+                          {ProductItemContent}
+                        </Link>
+                      );
+                    }
+
+                    return <div key={item.id}>{ProductItemContent}</div>;
+                  })}
                 </div>
-              </div>
-            );
-
-            if (order.status === 'PENDING') {
-              return (
-                <Link key={order.id} href={`/orders/${order.id}`} className="glass-card rounded-[2rem] border border-white/5 hover:border-primary/30 transition-all overflow-hidden block hover:shadow-[0_0_30px_rgba(59,130,246,0.15)]">
-                  {OrderCardContent}
-                </Link>
-              );
-            }
-
-            return (
-              <div key={order.id} className="glass-card rounded-[2rem] border border-white/5 hover:border-white/10 transition-all overflow-hidden">
-                {OrderCardContent}
               </div>
             );
           })}

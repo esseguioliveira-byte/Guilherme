@@ -9,7 +9,8 @@ export default async function AdminStockPage() {
   const allStock = await db.select({
     id: stockItems.id,
     content: stockItems.content,
-    isSold: stockItems.isSold,
+    maxSlots: stockItems.maxSlots,
+    usedSlots: stockItems.usedSlots,
     createdAt: stockItems.createdAt,
     productName: products.name,
     productId: products.id,
@@ -23,7 +24,7 @@ export default async function AdminStockPage() {
   const stockSummary = await db.select({
     productId: stockItems.productId,
     count: sql<number>`count(*)`,
-    available: sql<number>`sum(case when ${stockItems.isSold} = false then 1 else 0 end)`
+    available: sql<number>`sum(${stockItems.maxSlots} - ${stockItems.usedSlots})`
   })
   .from(stockItems)
   .groupBy(stockItems.productId);
@@ -87,13 +88,13 @@ export default async function AdminStockPage() {
                     </p>
                   </td>
                   <td className="px-8 py-6">
-                    {item.isSold ? (
+                    {item.usedSlots >= item.maxSlots ? (
                       <span className="flex items-center gap-2 text-emerald-400 text-[10px] font-black uppercase">
-                        <CheckCircle className="w-3 h-3" /> Vendido
+                        <CheckCircle className="w-3 h-3" /> Esgotado ({item.usedSlots}/{item.maxSlots})
                       </span>
                     ) : (
                       <span className="flex items-center gap-2 text-amber-400 text-[10px] font-black uppercase">
-                        <Clock className="w-3 h-3" /> Em Estoque
+                        <Clock className="w-3 h-3" /> Disponível ({item.usedSlots}/{item.maxSlots})
                       </span>
                     )}
                   </td>

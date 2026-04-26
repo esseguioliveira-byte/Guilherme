@@ -1,9 +1,9 @@
 'use server';
 
 import { db } from '@/db';
-import { products, users, orders, orderItems, stockItems } from '@/db/schema';
+import { products, users, orders, orderItems, stockItems, stockDeliveries } from '@/db/schema';
 
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import { auth } from '@/auth';
 import crypto from 'crypto';
 import { revalidatePath } from 'next/cache';
@@ -19,7 +19,8 @@ export async function updateOrderStatus(orderId: string, status: 'PENDING' | 'PA
     await checkAdmin();
     
     const [oldOrder] = await db.select().from(orders).where(eq(orders.id, orderId));
-    
+    if (!oldOrder) throw new Error('Pedido não encontrado');
+
     await db.update(orders).set({
       status,
     }).where(eq(orders.id, orderId));
@@ -27,25 +28,37 @@ export async function updateOrderStatus(orderId: string, status: 'PENDING' | 'PA
     // Lógica de Entrega Automática
     if (status === 'PAID' && oldOrder?.status !== 'PAID') {
       const items = await db.select().from(orderItems).where(eq(orderItems.orderId, orderId));
+      const userId = oldOrder.userId;
       
       for (const item of items) {
         const availableStock = await db.select()
           .from(stockItems)
-          .where(and(
-            eq(stockItems.productId, item.productId),
-            eq(stockItems.isSold, false)
-          ))
+          .where(sql`${stockItems.productId} = ${item.productId} AND ${stockItems.usedSlots} < ${stockItems.maxSlots} AND NOT EXISTS (
+            SELECT 1 FROM ${stockDeliveries} 
+            WHERE ${stockDeliveries.stockItemId} = ${stockItems.id} 
+            AND ${stockDeliveries.userId} = ${userId}
+          )`)
           .limit(item.quantity);
 
         for (const stock of availableStock) {
+          // Registrar entrega
+          await db.insert(stockDeliveries).values({
+            id: crypto.randomUUID(),
+            stockItemId: stock.id,
+            orderId: orderId,
+            userId: userId,
+          });
+
+          // Incrementar slots
           await db.update(stockItems)
-            .set({ isSold: true, orderId })
+            .set({ usedSlots: sql`${stockItems.usedSlots} + 1` })
             .where(eq(stockItems.id, stock.id));
         }
       }
     }
 
     revalidatePath('/admin/orders');
+    revalidatePath('/profile');
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message || 'Erro ao atualizar status do pedido' };
@@ -149,7 +162,7 @@ export async function deleteProduct(id: string) {
   }
 }
 
-export async function addStockItems(productId: string, content: string) {
+export async function addStockItems(productId: string, content: string, maxSlots: number = 1) {
   try {
     await checkAdmin();
     const items = content.split('\n').filter(line => line.trim() !== '');
@@ -158,7 +171,8 @@ export async function addStockItems(productId: string, content: string) {
         id: crypto.randomUUID(),
         productId,
         content: item.trim(),
-        isSold: false
+        maxSlots,
+        usedSlots: 0
       });
     }
     revalidatePath('/admin/stock');

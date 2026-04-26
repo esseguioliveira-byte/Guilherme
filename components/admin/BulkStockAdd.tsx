@@ -2,13 +2,15 @@
 
 import { useState } from 'react';
 import { addStockItems } from '@/app/actions/admin';
-import { Loader2, Plus, X } from 'lucide-react';
+import { Loader2, Plus, X, CheckCircle } from 'lucide-react';
 
 export default function BulkStockAdd({ products }: { products: any[] }) {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [productId, setProductId] = useState(products[0]?.id || '');
   const [content, setContent] = useState('');
+  const [stockType, setStockType] = useState<'private' | 'shared'>('private');
+  const [maxSlots, setMaxSlots] = useState(5);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,9 +18,12 @@ export default function BulkStockAdd({ products }: { products: any[] }) {
     
     setLoading(true);
     try {
-      const res = await addStockItems(productId, content);
+      const finalSlots = stockType === 'private' ? 5 : maxSlots;
+      const res = await addStockItems(productId, content, finalSlots);
       if (res.success) {
         setContent('');
+        setMaxSlots(5);
+        setStockType('private');
         setIsOpen(false);
       } else {
         alert(res.error);
@@ -63,6 +68,58 @@ export default function BulkStockAdd({ products }: { products: any[] }) {
               ))}
             </select>
           </div>
+          <div>
+            <label className="block text-[10px] font-black uppercase text-gray-500 mb-2">Tipo de Entrega</label>
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                type="button"
+                onClick={() => setStockType('private')}
+                className={`p-4 rounded-xl border font-bold text-xs transition-all ${
+                  stockType === 'private' 
+                    ? 'bg-primary/20 border-primary text-primary' 
+                    : 'bg-[#111] border-[#222] text-gray-500 hover:border-gray-700'
+                }`}
+              >
+                Privado (Até 5 Pessoas)
+              </button>
+              <button
+                type="button"
+                onClick={() => setStockType('shared')}
+                className={`p-4 rounded-xl border font-bold text-xs transition-all ${
+                  stockType === 'shared' 
+                    ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' 
+                    : 'bg-[#111] border-[#222] text-gray-500 hover:border-gray-700'
+                }`}
+              >
+                Compartilhado (Customizado)
+              </button>
+            </div>
+          </div>
+
+          {stockType === 'shared' && (
+            <div className="animate-in slide-in-from-top-2 duration-300">
+              <label className="block text-[10px] font-black uppercase text-gray-500 mb-2">Quantidade de Pessoas (Slots)</label>
+              <input 
+                type="number"
+                min={1}
+                value={maxSlots}
+                onChange={(e) => setMaxSlots(parseInt(e.target.value))}
+                className="w-full bg-[#111] border border-emerald-500/30 rounded-xl p-4 text-white outline-none focus:border-emerald-500 transition-all"
+              />
+              <p className="text-[9px] text-emerald-500/60 mt-2 italic font-medium uppercase tracking-wider">
+                * Este item será vendido para {maxSlots} clientes diferentes antes de esgotar.
+              </p>
+            </div>
+          )}
+          
+          {stockType === 'private' && (
+            <div className="p-4 bg-primary/10 border border-primary/20 rounded-xl animate-in fade-in duration-300">
+              <p className="text-[10px] text-primary font-bold uppercase tracking-widest flex items-center gap-2">
+                <CheckCircle className="w-3 h-3" /> Configuração Privada: 5 Vendas por Item
+              </p>
+            </div>
+          )}
+
           <div>
             <label className="block text-[10px] font-black uppercase text-gray-500 mb-2">Conteúdo (Uma linha por item)</label>
             <textarea 

@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ShoppingCart, Check, Plus, Circle, CheckCircle2, ArrowRight, Store, Zap, X } from 'lucide-react';
 import type { Product } from '@/db/schema';
 import { useCart } from '@/contexts/CartContext';
@@ -14,11 +14,25 @@ interface ProductPurchaseCardProps {
 export default function ProductPurchaseCard({ product, subProducts = [] }: ProductPurchaseCardProps) {
   const { addToCart } = useCart();
   const router = useRouter();
+  const searchParams = useSearchParams();
   
   const options = [product, ...subProducts];
-  const [selectedProduct, setSelectedProduct] = useState<Product>(product);
+  
+  // Auto-select variant from query param if available
+  const variantId = searchParams.get('variant');
+  const initialSelection = variantId ? (options.find(opt => opt.id === variantId) || product) : product;
+
+  const [selectedProduct, setSelectedProduct] = useState<Product>(initialSelection);
   const [showConfirm, setShowConfirm] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
+
+  // Update selection if variantId changes
+  useEffect(() => {
+    if (variantId) {
+      const found = options.find(opt => opt.id === variantId);
+      if (found) setSelectedProduct(found);
+    }
+  }, [variantId]);
   
   const handleAddToCart = () => {
     if (!isAdded) {

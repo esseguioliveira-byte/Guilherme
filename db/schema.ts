@@ -162,21 +162,46 @@ export const stockItems = mysqlTable('stock_items', {
   productId: varchar('product_id', { length: 255 })
     .notNull()
     .references(() => products.id, { onDelete: 'cascade' }),
-  orderId: varchar('order_id', { length: 255 })
-    .references(() => orders.id),
   content: text('content').notNull(), // O código, link ou conta a ser entregue
-  isSold: boolean('is_sold').default(false).notNull(),
+  maxSlots: int('max_slots').default(1).notNull(), // 1 para privado, >1 para compartilhado
+  usedSlots: int('used_slots').default(0).notNull(),
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
 });
 
-export const stockItemRelations = relations(stockItems, ({ one }) => ({
+export const stockDeliveries = mysqlTable('stock_deliveries', {
+  id: varchar('id', { length: 255 }).primaryKey(),
+  stockItemId: varchar('stock_item_id', { length: 255 })
+    .notNull()
+    .references(() => stockItems.id, { onDelete: 'cascade' }),
+  orderId: varchar('order_id', { length: 255 })
+    .notNull()
+    .references(() => orders.id, { onDelete: 'cascade' }),
+  userId: varchar('user_id', { length: 255 })
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+});
+
+export const stockItemRelations = relations(stockItems, ({ one, many }) => ({
   product: one(products, {
     fields: [stockItems.productId],
     references: [products.id],
   }),
+  deliveries: many(stockDeliveries),
+}));
+
+export const stockDeliveryRelations = relations(stockDeliveries, ({ one }) => ({
+  stockItem: one(stockItems, {
+    fields: [stockDeliveries.stockItemId],
+    references: [stockItems.id],
+  }),
   order: one(orders, {
-    fields: [stockItems.orderId],
+    fields: [stockDeliveries.orderId],
     references: [orders.id],
+  }),
+  user: one(users, {
+    fields: [stockDeliveries.userId],
+    references: [users.id],
   }),
 }));
 
@@ -228,6 +253,7 @@ export const paymentSettings = mysqlTable('payment_settings', {
 export type Product = typeof products.$inferSelect;
 export type Order = typeof orders.$inferSelect;
 export type StockItem = typeof stockItems.$inferSelect;
+export type StockDelivery = typeof stockDeliveries.$inferSelect;
 export type SiteVisit = typeof siteVisits.$inferSelect;
 export type Coupon = typeof coupons.$inferSelect;
 export type WithdrawalRequest = typeof withdrawalRequests.$inferSelect;
