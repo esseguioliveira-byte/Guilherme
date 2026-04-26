@@ -58,7 +58,7 @@ export default function Footer() {
 
         <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-gray-500 text-xs">
-            © {new Date().getFullYear()} Deep Space. Todos os direitos reservados.
+            © {new Date().getFullYear()} BahiaStore. Todos os direitos reservados.
           </p>
           <div className="flex items-center gap-2 text-gray-500 text-xs font-medium">
             Pagamentos seguros via <span className="text-emerald-400/70 italic font-bold uppercase tracking-wider">Pix</span>
