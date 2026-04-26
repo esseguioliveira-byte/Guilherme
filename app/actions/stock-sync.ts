@@ -8,6 +8,28 @@ import { eq, sql, isNull } from 'drizzle-orm';
  * Sincroniza a coluna 'stock' da tabela 'products' com a quantidade real
  * de itens disponíveis na tabela 'stock_items' (onde orderId é nulo).
  */
+export async function synchronizeProductStock(productId: string, tx?: any) {
+  const connection = tx || db;
+  
+  const [countResult] = await connection
+    .select({ count: sql<number>`COALESCE(SUM(${stockItems.maxSlots} - ${stockItems.usedSlots}), 0)` })
+    .from(stockItems)
+    .where(eq(stockItems.productId, productId));
+
+  const actualStock = Number(countResult?.count || 0);
+
+  await connection
+    .update(products)
+    .set({ stock: actualStock })
+    .where(eq(products.id, productId));
+    
+  return actualStock;
+}
+
+/**
+ * Sincroniza a coluna 'stock' da tabela 'products' com a quantidade real
+ * de itens disponíveis na tabela 'stock_items'.
+ */
 export async function synchronizeGlobalStock() {
   console.log('[Stock Sync] Iniciando sincronização global...');
   
@@ -17,20 +39,7 @@ export async function synchronizeGlobalStock() {
     let totalUpdated = 0;
 
     for (const product of allProducts) {
-      // Contar quantos itens reais existem para este produto que NÃO foram vendidos
-      const [countResult] = await db
-        .select({ count: sql<number>`COALESCE(SUM(${stockItems.maxSlots} - ${stockItems.usedSlots}), 0)` })
-        .from(stockItems)
-        .where(eq(stockItems.productId, product.id));
-
-      const actualStock = Number(countResult?.count || 0);
-
-      // Atualizar a tabela de produtos com o valor real
-      await db
-        .update(products)
-        .set({ stock: actualStock })
-        .where(eq(products.id, product.id));
-      
+      await synchronizeProductStock(product.id);
       totalUpdated++;
     }
 

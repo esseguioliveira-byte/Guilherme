@@ -116,6 +116,9 @@ export async function POST(req: NextRequest) {
                 .set({ usedSlots: sql`${stockItems.usedSlots} + 1` })
                 .where(eq(stockItems.id, stock.id));
             }
+            // Sincronizar o estoque real do produto
+            const { synchronizeProductStock } = require('@/app/actions/stock-sync');
+            await synchronizeProductStock(item.productId, tx);
           }
         }
       });

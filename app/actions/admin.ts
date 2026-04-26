@@ -4,6 +4,7 @@ import { db } from '@/db';
 import { products, users, orders, orderItems, stockItems, stockDeliveries } from '@/db/schema';
 
 import { eq, and, sql } from 'drizzle-orm';
+import { synchronizeProductStock } from './stock-sync';
 import { auth } from '@/auth';
 import crypto from 'crypto';
 import { revalidatePath } from 'next/cache';
@@ -54,6 +55,8 @@ export async function updateOrderStatus(orderId: string, status: 'PENDING' | 'PA
             .set({ usedSlots: sql`${stockItems.usedSlots} + 1` })
             .where(eq(stockItems.id, stock.id));
         }
+        
+        await synchronizeProductStock(item.productId);
       }
     }
 
@@ -175,6 +178,9 @@ export async function addStockItems(productId: string, content: string, maxSlots
         usedSlots: 0
       });
     }
+    
+    await synchronizeProductStock(productId);
+    
     revalidatePath('/admin/stock');
     return { success: true };
   } catch (error: any) {
@@ -185,7 +191,13 @@ export async function addStockItems(productId: string, content: string, maxSlots
 export async function deleteStockItem(id: string) {
   try {
     await checkAdmin();
+    const [item] = await db.select().from(stockItems).where(eq(stockItems.id, id));
     await db.delete(stockItems).where(eq(stockItems.id, id));
+    
+    if (item) {
+      await synchronizeProductStock(item.productId);
+    }
+    
     revalidatePath('/admin/stock');
     return { success: true };
   } catch (error: any) {
