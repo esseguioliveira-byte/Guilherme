@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Zap, Plus, Check } from 'lucide-react';
+import { Zap, ShoppingCart, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Product } from '@/db/schema';
 import { useRouter } from 'next/navigation';
@@ -53,7 +53,7 @@ export default function ProductCard({ product }: { product: Product }) {
         <div className="absolute inset-0 bg-gradient-to-t from-[#02040a] via-transparent to-transparent opacity-80" />
         
         {/* Category Badge */}
-        <div className="absolute top-4 left-4 z-10">
+        <div className="absolute top-4 left-4 z-10 hidden sm:block">
           <span className="bg-primary/20 backdrop-blur-md border border-primary/30 text-[10px] px-3 py-1 rounded-full text-primary font-black uppercase tracking-widest nasa-title">
             {product.category}
           </span>
@@ -100,7 +100,7 @@ export default function ProductCard({ product }: { product: Product }) {
             <button 
               onClick={handleBuyNow}
               disabled={product.stock <= 0}
-              className={`flex-[3] py-3.5 sm:py-4 flex items-center justify-center gap-2 sm:gap-3 rounded-xl sm:rounded-2xl transition-all duration-300 font-black uppercase italic tracking-widest text-[9px] sm:text-[11px] ${
+              className={`${(product as any).hasSubProducts ? 'w-full' : 'flex-[3]'} py-3.5 sm:py-4 flex items-center justify-center gap-2 sm:gap-3 rounded-xl sm:rounded-2xl transition-all duration-300 font-black uppercase italic tracking-widest text-[9px] sm:text-[11px] ${
                 product.stock > 0 
                 ? 'btn-stardust text-white cursor-pointer shadow-[0_10px_25px_rgba(59,130,246,0.2)] hover:shadow-[0_15px_35px_rgba(59,130,246,0.4)] hover:-translate-y-1' 
                 : 'bg-[#111] text-gray-700 cursor-not-allowed border border-white/5'
@@ -110,24 +110,26 @@ export default function ProductCard({ product }: { product: Product }) {
               Comprar Agora
             </button>
 
-            <button 
-              onClick={handleAddToCart}
-              disabled={product.stock <= 0}
-              title="Adicionar ao Carrinho"
-              className={`flex-1 py-4 flex items-center justify-center rounded-2xl transition-all duration-500 border ${
-                product.stock > 0 
-                ? isAdded 
-                  ? 'bg-emerald-500 text-white border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.4)] scale-105' 
-                  : 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-primary/50 hover:-translate-y-1' 
-                : 'bg-[#111] text-gray-700 cursor-not-allowed border border-white/5'
-              }`}
-            >
-              {isAdded ? (
-                <Check className="w-5 h-5 animate-in zoom-in duration-300" strokeWidth={3} />
-              ) : (
-                <Plus className="w-5 h-5" strokeWidth={2.5} />
-              )}
-            </button>
+            {!(product as any).hasSubProducts && (
+              <button 
+                onClick={handleAddToCart}
+                disabled={product.stock <= 0}
+                title="Adicionar ao Carrinho"
+                className={`hidden sm:flex flex-1 py-4 items-center justify-center rounded-2xl transition-all duration-500 border ${
+                  product.stock > 0 
+                  ? isAdded 
+                    ? 'bg-emerald-500 text-white border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.4)] scale-105' 
+                    : 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-primary/50 hover:-translate-y-1' 
+                  : 'bg-[#111] text-gray-700 cursor-not-allowed border border-white/5'
+                }`}
+              >
+                {isAdded ? (
+                  <Check className="w-5 h-5 animate-in zoom-in duration-300" strokeWidth={3} />
+                ) : (
+                  <ShoppingCart className="w-5 h-5" strokeWidth={2.5} />
+                )}
+              </button>
+            )}
           </div>
         </div>
       </div>

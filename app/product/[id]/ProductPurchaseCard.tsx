@@ -166,29 +166,31 @@ export default function ProductPurchaseCard({ product, subProducts = [] }: Produ
         <button 
           onClick={handleBuyNow}
           disabled={selectedProduct.stock <= 0}
-          className="flex-[4] bg-primary hover:bg-blue-600 disabled:bg-[#222] disabled:text-gray-500 disabled:cursor-not-allowed text-white font-black py-5 rounded-2xl transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] disabled:shadow-none flex items-center justify-center gap-2 uppercase tracking-wider text-sm"
+          className={`${subProducts.length > 0 ? 'w-full' : 'flex-[4]'} bg-primary hover:bg-blue-600 disabled:bg-[#222] disabled:text-gray-500 disabled:cursor-not-allowed text-white font-black py-5 rounded-2xl transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] disabled:shadow-none flex items-center justify-center gap-2 uppercase tracking-wider text-sm`}
         >
           <Zap className="w-4 h-4" />
           Comprar Agora
         </button>
         
-        <button 
-          onClick={handleAddToCart}
-          disabled={selectedProduct.stock <= 0}
-          className={`flex-1 py-5 flex items-center justify-center rounded-2xl transition-all duration-500 border ${
-            selectedProduct.stock > 0 
-            ? isAdded 
-              ? 'bg-emerald-500 text-white border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.4)] scale-105' 
-              : 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-primary/50' 
-            : 'bg-[#111] text-gray-700 cursor-not-allowed border border-white/5'
-          }`}
-        >
-          {isAdded ? (
-            <Check className="w-6 h-6 animate-in zoom-in duration-300" strokeWidth={3} />
-          ) : (
-            <Plus className="w-6 h-6" strokeWidth={2.5} />
-          )}
-        </button>
+        {subProducts.length === 0 && (
+          <button 
+            onClick={handleAddToCart}
+            disabled={selectedProduct.stock <= 0}
+            className={`flex-1 py-5 flex items-center justify-center rounded-2xl transition-all duration-500 border ${
+              selectedProduct.stock > 0 
+              ? isAdded 
+                ? 'bg-emerald-500 text-white border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.4)] scale-105' 
+                : 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-primary/50' 
+              : 'bg-[#111] text-gray-700 cursor-not-allowed border border-white/5'
+            }`}
+          >
+            {isAdded ? (
+              <Check className="w-6 h-6 animate-in zoom-in duration-300" strokeWidth={3} />
+            ) : (
+              <ShoppingCart className="w-6 h-6" strokeWidth={2.5} />
+            )}
+          </button>
+        )}
       </div>
     </div>
   );
