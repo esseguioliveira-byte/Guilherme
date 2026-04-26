@@ -19,9 +19,9 @@ export async function synchronizeGlobalStock() {
     for (const product of allProducts) {
       // Contar quantos itens reais existem para este produto que NÃO foram vendidos
       const [countResult] = await db
-        .select({ count: sql<number>`count(*)` })
+        .select({ count: sql<number>`COALESCE(SUM(${stockItems.maxSlots} - ${stockItems.usedSlots}), 0)` })
         .from(stockItems)
-        .where(sql`${stockItems.productId} = ${product.id} AND ${stockItems.orderId} IS NULL`);
+        .where(eq(stockItems.productId, product.id));
 
       const actualStock = Number(countResult?.count || 0);
 
