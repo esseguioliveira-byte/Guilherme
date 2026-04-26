@@ -3,7 +3,7 @@
 -- Fixes: Missing 'stock_deliveries' table
 
 -- 1. Fix email_verified in users table
-ALTER TABLE `users` MODIFY COLUMN `email_verified` datetime NULL;
+ALTER TABLE `users` MODIFY COLUMN `email_verified` timestamp NULL;
 
 -- 2. Create missing tables if they don't exist
 CREATE TABLE IF NOT EXISTS `stock_deliveries` (
