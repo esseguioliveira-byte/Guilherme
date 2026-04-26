@@ -32,6 +32,7 @@ export default async function ProductGrid({ currentCategory }: { currentCategory
       ...parent,
       price: cheapestItem.price,
       stock: totalStock,
+      hasSubProducts: children.length > 0,
     };
   });
 

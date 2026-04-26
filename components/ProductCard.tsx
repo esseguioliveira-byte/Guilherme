@@ -17,8 +17,12 @@ export default function ProductCard({ product }: { product: Product }) {
     e.preventDefault();
     e.stopPropagation();
     if (product.stock > 0) {
-      addToCart(product, 1, false);
-      router.push('/checkout');
+      if ((product as any).hasSubProducts) {
+        router.push(`/product/${product.id}`);
+      } else {
+        addToCart(product, 1, false);
+        router.push('/checkout');
+      }
     }
   };
 
