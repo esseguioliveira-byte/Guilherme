@@ -1,4 +1,4 @@
-import { mysqlTable, varchar, timestamp, int, decimal, text, mysqlEnum, boolean } from 'drizzle-orm/mysql-core';
+import { mysqlTable, varchar, timestamp, datetime, int, decimal, text, mysqlEnum, boolean } from 'drizzle-orm/mysql-core';
 import { relations } from 'drizzle-orm';
 
 export const users = mysqlTable('users', {
@@ -6,7 +6,7 @@ export const users = mysqlTable('users', {
   name: varchar('name', { length: 255 }),
   email: varchar('email', { length: 255 }).unique().notNull(),
   password: varchar('password', { length: 255 }),
-  emailVerified: timestamp('email_verified', { mode: 'date' }),
+  emailVerified: datetime('email_verified', { mode: 'date' }),
   image: varchar('image', { length: 255 }),
   isAffiliate: boolean('is_affiliate').default(false).notNull(),
   affiliateCode: varchar('affiliate_code', { length: 50 }).unique(),

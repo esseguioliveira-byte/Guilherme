@@ -70,7 +70,7 @@ export default async function AdminPage({
   })
   .from(orders)
   .where(and(eq(orders.status, 'PAID'), gte(orders.createdAt, startDate)))
-  .groupBy(sql`DATE(${orders.createdAt})`)
+  .groupBy(sql`DATE(${orders.createdAt}), DATE_FORMAT(${orders.createdAt}, '%d/%m')`)
   .orderBy(sql`DATE(${orders.createdAt})`);
 
   // Fill gaps for chart data
