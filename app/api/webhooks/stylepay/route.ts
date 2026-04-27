@@ -41,11 +41,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Payload inválido' }, { status: 400 });
     }
 
-    // Mapeamento real Stylepay
-    const stylepayId = event.idTransaction;
-    const requestNumber = event.requestNumber;
-    const eventType = event.event;
-    const status = event.statusTransaction;
+    // Mapeamento flexível para a Stylepay
+    const stylepayId = event.transaction_id || event.payment_id || event.idTransaction;
+    const requestNumber = event.requestNumber || event?.metadata?.requestNumber || event.external_id;
+    const eventType = event.event || event.event_type;
+    const status = event.status || event.statusTransaction;
 
     console.log('[Stylepay Webhook] Evento:', eventType, '| Status:', status, '| Style ID:', stylepayId, '| Req No:', requestNumber);
 
@@ -68,8 +68,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ received: true, warning: 'Pedido não encontrado' });
     }
 
-    const isPaid = eventType === 'pix.cashin.paid' || status === 'PAID';
-    const isCancelled = eventType === 'pix.cashout.cancelled' || status === 'CANCELLED';
+    const isPaid = eventType === 'pix.cashin.paid' || eventType === 'payment.approved' || status === 'PAID' || status === 'PAID_OUT' || status === 'approved';
+    const isCancelled = eventType === 'pix.cashout.cancelled' || status === 'CANCELLED' || status === 'canceled' || status === 'REJECTED';
 
     if (isPaid) {
       // Evitar re-processar se já estiver pago
