@@ -78,7 +78,7 @@ export async function processCartPurchase(items: CartItemInput[], couponCode?: s
     const finalTotal = Number(Math.max(0, totalAmount - discountAmount).toFixed(2));
 
     // Build app base URL for webhook postback
-    const appUrl = process.env.NEXTAUTH_URL || process.env.APP_URL || 'https://sualoja.com';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || process.env.APP_URL || 'https://sualoja.com';
     const postbackUrl = `${appUrl}/api/webhooks/stylepay`;
 
     // Call Stylepay API to generate real PIX QR Code
