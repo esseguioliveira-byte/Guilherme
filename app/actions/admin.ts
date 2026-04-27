@@ -153,8 +153,12 @@ export async function updateProduct(id: string, formData: FormData) {
 export async function deleteProduct(id: string) {
   try {
     await checkAdmin();
+    console.log(`[Admin] Deletando produto: ${id}`);
     await db.delete(products).where(eq(products.id, id));
+    
     revalidatePath('/admin/products');
+    revalidatePath('/admin/stock');
+    revalidatePath('/search');
     revalidatePath('/');
     return { success: true };
   } catch (error: any) {

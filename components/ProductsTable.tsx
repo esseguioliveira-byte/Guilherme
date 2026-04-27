@@ -28,8 +28,15 @@ export default function ProductsTable({
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('Tem certeza que deseja deletar este produto?')) {
-      await deleteProduct(id);
+    if (!confirm('Tem certeza que deseja deletar este produto?')) return;
+    
+    try {
+      const result = await deleteProduct(id);
+      if (!result.success) {
+        alert(result.error || 'Erro ao deletar produto');
+      }
+    } catch (error) {
+      alert('Erro de conexão ao deletar produto');
     }
   };
 

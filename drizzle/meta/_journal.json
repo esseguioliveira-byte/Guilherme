@@ -15,6 +15,13 @@
       "when": 1777165077187,
       "tag": "0001_swift_sally_floyd",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1777259754518,
+      "tag": "0002_add_on_delete_cascade",
+      "breakpoints": true
     }
   ]
 }

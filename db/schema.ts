@@ -85,7 +85,7 @@ export const products = mysqlTable('products', {
   price: decimal('price', { precision: 10, scale: 2 }).notNull(),
   category: varchar('category', { length: 255 }).notNull(), // Legacy field
   categoryId: varchar('category_id', { length: 255 }).references(() => categories.id),
-  parentId: varchar('parent_id', { length: 255 }).references((): any => products.id), // Self-reference
+  parentId: varchar('parent_id', { length: 255 }).references((): any => products.id, { onDelete: 'cascade' }), // Self-reference
   stock: int('stock').notNull().default(0),
   imageUrl: varchar('image_url', { length: 255 }).notNull(),
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
@@ -133,7 +133,7 @@ export const orderItems = mysqlTable('order_items', {
     .references(() => orders.id, { onDelete: 'cascade' }),
   productId: varchar('product_id', { length: 255 })
     .notNull()
-    .references(() => products.id),
+    .references(() => products.id, { onDelete: 'cascade' }),
   quantity: int('quantity').notNull().default(1),
   price: decimal('price', { precision: 10, scale: 2 }).notNull(),
 });
