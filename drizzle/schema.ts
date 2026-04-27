@@ -42,7 +42,7 @@ export const categories = mysqlTable("categories", {
 export const coupons = mysqlTable("coupons", {
 	id: varchar({ length: 255 }).notNull(),
 	code: varchar({ length: 50 }).notNull(),
-	type: mysqlEnum(['PERCENTAGE','FIXED']).default('\'PERCENTAGE\'').notNull(),
+	type: mysqlEnum(['PERCENTAGE','FIXED']).default('PERCENTAGE').notNull(),
 	value: decimal({ precision: 10, scale: 2 }).notNull(),
 	minOrderAmount: decimal("min_order_amount", { precision: 10, scale: 2 }).default('0.00').notNull(),
 	maxUses: int("max_uses"),
@@ -58,7 +58,7 @@ export const coupons = mysqlTable("coupons", {
 export const orders = mysqlTable("orders", {
 	id: varchar({ length: 255 }).notNull(),
 	userId: varchar("user_id", { length: 255 }).notNull().references(() => users.id),
-	status: mysqlEnum(['PENDING','PAID','CANCELLED']).default('\'PENDING\'').notNull(),
+	status: mysqlEnum(['PENDING','PAID','CANCELLED']).default('PENDING').notNull(),
 	totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
 	pixCode: text("pix_code"),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('current_timestamp()').notNull(),
@@ -77,12 +77,12 @@ export const orderItems = mysqlTable("order_items", {
 
 export const paymentSettings = mysqlTable("payment_settings", {
 	id: varchar({ length: 255 }).notNull(),
-	provider: varchar({ length: 50 }).default('\'stylepay\'').notNull(),
+	provider: varchar({ length: 50 }).default('stylepay').notNull(),
 	clientId: text("client_id").notNull(),
 	clientSecret: text("client_secret").notNull(),
 	isActive: tinyint("is_active").default(1).notNull(),
 	webhookSecret: text("webhook_secret"),
-	environment: mysqlEnum(['sandbox','production']).default('\'production\'').notNull(),
+	environment: mysqlEnum(['sandbox','production']).default('production').notNull(),
 	updatedAt: timestamp("updated_at", { mode: 'string' }).default('current_timestamp()').notNull(),
 });
 
@@ -147,7 +147,7 @@ export const users = mysqlTable("users", {
 	commissionRate: decimal("commission_rate", { precision: 5, scale: 2 }).default('5.00').notNull(),
 	isAffiliate: tinyint("is_affiliate").default(0).notNull(),
 	affiliateCode: varchar("affiliate_code", { length: 50 }),
-	role: mysqlEnum(['USER','ADMIN']).default('\'USER\'').notNull(),
+	role: mysqlEnum(['USER','ADMIN']).default('USER').notNull(),
 	bio: text(),
 },
 (table) => [
@@ -167,7 +167,7 @@ export const withdrawalRequests = mysqlTable("withdrawal_requests", {
 	amount: decimal({ precision: 12, scale: 2 }).notNull(),
 	pixKey: varchar("pix_key", { length: 255 }).notNull(),
 	pixKeyType: mysqlEnum("pix_key_type", ['CPF','CNPJ','EMAIL','PHONE','RANDOM']).notNull(),
-	status: mysqlEnum(['PENDING','APPROVED','REJECTED']).default('\'PENDING\'').notNull(),
+	status: mysqlEnum(['PENDING','APPROVED','REJECTED']).default('PENDING').notNull(),
 	adminNote: text("admin_note"),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('current_timestamp()').notNull(),
 	resolvedAt: timestamp("resolved_at", { mode: 'string' }),
