@@ -114,15 +114,9 @@ export default function AdminProductModal({ isOpen, onClose, productToEdit, cate
             <textarea name="description" required defaultValue={productToEdit?.description || ''} className="w-full bg-[#111] border border-[#333] rounded-lg p-2 text-white outline-none focus:border-primary h-20" />
           </div>
 
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-300 mb-1">Preço (R$)</label>
-              <input name="price" type="number" step="0.01" required defaultValue={productToEdit?.price ? Number(productToEdit.price) : ''} className="w-full bg-[#111] border border-[#333] rounded-lg p-2 text-white outline-none focus:border-primary" />
-            </div>
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-300 mb-1">Estoque</label>
-              <input name="stock" type="number" required defaultValue={productToEdit?.stock ?? 1} className="w-full bg-[#111] border border-[#333] rounded-lg p-2 text-white outline-none focus:border-primary" />
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Preço (R$)</label>
+            <input name="price" type="number" step="0.01" required defaultValue={productToEdit?.price ? Number(productToEdit.price) : ''} className="w-full bg-[#111] border border-[#333] rounded-lg p-2 text-white outline-none focus:border-primary" />
           </div>
 
           <div>

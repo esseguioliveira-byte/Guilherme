@@ -96,7 +96,6 @@ export async function createProduct(formData: FormData) {
     const categoryId = formData.get('categoryId') as string;
     const categoryName = formData.get('categoryName') as string; // Keep for legacy
     const parentId = formData.get('parentId') as string;
-    const stock = Number(formData.get('stock'));
     const imageUrl = formData.get('imageUrl') as string;
 
     await db.insert(products).values({
@@ -107,7 +106,7 @@ export async function createProduct(formData: FormData) {
       category: categoryName || 'Outros', // Legacy field
       categoryId: categoryId || null,
       parentId: parentId || null,
-      stock,
+      stock: 0,
       imageUrl,
     });
 
@@ -129,7 +128,6 @@ export async function updateProduct(id: string, formData: FormData) {
     const categoryId = formData.get('categoryId') as string;
     const categoryName = formData.get('categoryName') as string;
     const parentId = formData.get('parentId') as string;
-    const stock = Number(formData.get('stock'));
     const imageUrl = formData.get('imageUrl') as string;
 
     await db.update(products).set({
@@ -139,7 +137,6 @@ export async function updateProduct(id: string, formData: FormData) {
       category: categoryName,
       categoryId: categoryId || null,
       parentId: parentId || null,
-      stock,
       imageUrl,
     }).where(eq(products.id, id));
 
