@@ -101,7 +101,7 @@ export default function PixPaymentPanel({
           )}
           <div className="flex flex-col sm:flex-row gap-4 w-full max-w-xs">
             <Link
-              href="/account"
+              href="/profile"
               className="flex-1 py-3 text-center bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black uppercase italic text-sm tracking-widest transition-all"
             >
               Ver Pedidos
