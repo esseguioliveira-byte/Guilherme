@@ -13,59 +13,71 @@ const MIN_WITHDRAWAL = 20; // R$20 mínimo
 // Affiliate: Request withdrawal
 // ──────────────────────────────────────────────
 export async function requestWithdrawal(formData: FormData) {
-  const session = await auth();
-  if (!session?.user?.id) return { error: 'Não autorizado.' };
+  try {
+    const session = await auth();
+    if (!session?.user?.id) return { error: 'Não autorizado. Faça login novamente.' };
 
-  const amount    = parseFloat(formData.get('amount') as string);
-  const pixKey    = (formData.get('pixKey') as string)?.trim();
-  const pixKeyType = formData.get('pixKeyType') as 'CPF' | 'CNPJ' | 'EMAIL' | 'PHONE' | 'RANDOM';
+    const amountRaw = formData.get('amount') as string;
+    const amount = parseFloat(amountRaw);
+    const pixKey = (formData.get('pixKey') as string)?.trim();
+    const pixKeyType = formData.get('pixKeyType') as 'CPF' | 'CNPJ' | 'EMAIL' | 'PHONE' | 'RANDOM';
 
-  if (!amount || amount < MIN_WITHDRAWAL) {
-    return { error: `O valor mínimo para saque é R$ ${MIN_WITHDRAWAL.toFixed(2)}.` };
+    if (isNaN(amount) || amount < MIN_WITHDRAWAL) {
+      return { error: `O valor mínimo para saque é R$ ${MIN_WITHDRAWAL.toFixed(2).replace('.', ',')}.` };
+    }
+    if (!pixKey || !pixKeyType) {
+      return { error: 'Informe a chave PIX e o tipo corretamente.' };
+    }
+
+    return await db.transaction(async (tx) => {
+      // Fetch fresh user data within transaction
+      const [user] = await tx.select().from(users)
+        .where(eq(users.id, session.user.id))
+        .for('update'); // Lock row for update
+
+      if (!user) return { error: 'Usuário não encontrado.' };
+      if (!user.isAffiliate) return { error: 'Sua conta não está habilitada para o programa de afiliados.' };
+
+      const balance = parseFloat(user.balance as string);
+      if (amount > balance) {
+        return { error: `Saldo insuficiente. Seu saldo disponível é R$ ${balance.toFixed(2).replace('.', ',')}.` };
+      }
+
+      // Check for pending requests
+      const [pending] = await tx.select().from(withdrawalRequests)
+        .where(and(
+          eq(withdrawalRequests.affiliateId, user.id),
+          eq(withdrawalRequests.status, 'PENDING')
+        ));
+
+      if (pending) {
+        return { error: 'Você já possui uma solicitação de saque em análise. Aguarde a conclusão.' };
+      }
+
+      // 1. Deduct balance immediately
+      const newBalance = (balance - amount).toFixed(2);
+      await tx.update(users)
+        .set({ balance: newBalance })
+        .where(eq(users.id, user.id));
+
+      // 2. Create the request record
+      await tx.insert(withdrawalRequests).values({
+        id: randomUUID(),
+        affiliateId: user.id,
+        amount: amount.toFixed(2),
+        pixKey,
+        pixKeyType,
+        status: 'PENDING',
+      });
+
+      return { success: true, message: 'Solicitação realizada com sucesso! O valor será enviado para sua chave PIX em até 48h úteis.' };
+    });
+  } catch (error: any) {
+    console.error('[RequestWithdrawal] Error:', error);
+    return { error: 'Ocorreu um erro interno ao processar seu saque. Tente novamente mais tarde.' };
+  } finally {
+    revalidatePath('/affiliates/dashboard');
   }
-  if (!pixKey || !pixKeyType) {
-    return { error: 'Informe a chave PIX e o tipo.' };
-  }
-
-  const user = await db.select().from(users)
-    .where(eq(users.id, session.user.id))
-    .then(r => r[0]);
-
-  if (!user?.isAffiliate) return { error: 'Conta não é afiliada.' };
-
-  const balance = parseFloat(user.balance as string);
-  if (amount > balance) {
-    return { error: `Saldo insuficiente. Seu saldo é R$ ${balance.toFixed(2)}.` };
-  }
-
-  // Check if already has a PENDING request
-  const pending = await db.select().from(withdrawalRequests)
-    .where(and(
-      eq(withdrawalRequests.affiliateId, user.id),
-      eq(withdrawalRequests.status, 'PENDING')
-    ))
-    .then(r => r[0]);
-
-  if (pending) {
-    return { error: 'Você já possui um saque pendente. Aguarde a aprovação.' };
-  }
-
-  // Deduct balance immediately (held in escrow until admin approves/rejects)
-  const newBalance = (balance - amount).toFixed(2);
-  await db.update(users).set({ balance: newBalance }).where(eq(users.id, user.id));
-
-  // Create withdrawal request
-  await db.insert(withdrawalRequests).values({
-    id: randomUUID(),
-    affiliateId: user.id,
-    amount: amount.toFixed(2),
-    pixKey,
-    pixKeyType,
-    status: 'PENDING',
-  });
-
-  revalidatePath('/affiliates/dashboard');
-  return { success: true, message: 'Solicitação enviada! Aguarde aprovação em até 48h.' };
 }
 
 // ──────────────────────────────────────────────

@@ -26,21 +26,32 @@ export default function WithdrawalModal({ balance, onClose }: WithdrawalModalPro
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (status === 'loading') return;
+    
     setStatus('loading');
+    setMessage('');
 
-    const fd = new FormData();
-    fd.set('amount', amount);
-    fd.set('pixKey', pixKey);
-    fd.set('pixKeyType', pixKeyType);
+    try {
+      const fd = new FormData();
+      fd.set('amount', amount);
+      fd.set('pixKey', pixKey);
+      fd.set('pixKeyType', pixKeyType);
 
-    const result = await requestWithdrawal(fd);
+      const result = await requestWithdrawal(fd);
 
-    if (result.success) {
-      setStatus('success');
-      setMessage(result.message || 'Solicitação enviada!');
-    } else {
+      if (result.success) {
+        setStatus('success');
+        setMessage(result.message || 'Sua solicitação foi enviada com sucesso e será processada em breve.');
+        setAmount('');
+        setPixKey('');
+      } else {
+        setStatus('error');
+        setMessage(result.error || 'Não foi possível processar sua solicitação no momento.');
+      }
+    } catch (err) {
+      console.error('Submit error:', err);
       setStatus('error');
-      setMessage(result.error || 'Erro ao processar.');
+      setMessage('Erro de conexão. Verifique sua internet e tente novamente.');
     }
   }
 
