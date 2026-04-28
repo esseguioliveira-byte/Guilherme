@@ -120,10 +120,7 @@ export async function processCartPurchase(items: CartItemInput[], couponCode?: s
 
     // Atomic Transaction — insert everything at once
     await db.transaction(async (tx) => {
-      // 1. Update Stock
-      for (const item of finalItemsToInsert) {
-        await tx.update(products).set({ stock: item.productStockLeft }).where(eq(products.id, item.productId));
-      }
+      // 1. O estoque não será reduzido aqui, apenas quando o webhook confirmar o pagamento (PAID).
 
       // 2. Insert Order (PENDING — Stylepay webhook will flip to PAID)
       await tx.insert(orders).values({
