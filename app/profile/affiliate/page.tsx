@@ -14,6 +14,7 @@ import {
   Users
 } from 'lucide-react';
 import Link from 'next/link';
+import WithdrawalMinimalButton from '@/components/WithdrawalMinimalButton';
 import CopyButton from '@/components/CopyButton';
 
 export default async function AffiliateTab() {
@@ -137,9 +138,7 @@ export default async function AffiliateTab() {
            </div>
            <p className="text-[10px] text-gray-600 font-black uppercase tracking-[0.2em] mb-2">Saldo Disponível</p>
            <h3 className="text-2xl font-black text-emerald-400 italic">R$ {Number(user.balance).toFixed(2).replace('.', ',')}</h3>
-           <button className="mt-4 flex items-center gap-2 text-[10px] font-black text-white uppercase tracking-widest hover:text-emerald-400 transition-colors">
-              Solicitar Saque <ArrowUpRight className="w-3 h-3" />
-           </button>
+           <WithdrawalMinimalButton balance={Number(user.balance)} />
         </div>
 
         <div className="glass-card p-8 rounded-[2rem] border border-white/5 group relative overflow-hidden">
