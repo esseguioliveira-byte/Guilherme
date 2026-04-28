@@ -39,14 +39,14 @@ export default function WithdrawalModal({ balance, onClose }: WithdrawalModalPro
 
       const result = await requestWithdrawal(fd);
 
-      if (result.success) {
+      if ('error' in result) {
+        setStatus('error');
+        setMessage(result.error || 'Não foi possível processar sua solicitação no momento.');
+      } else {
         setStatus('success');
         setMessage(result.message || 'Sua solicitação foi enviada com sucesso e será processada em breve.');
         setAmount('');
         setPixKey('');
-      } else {
-        setStatus('error');
-        setMessage(result.error || 'Não foi possível processar sua solicitação no momento.');
       }
     } catch (err) {
       console.error('Submit error:', err);

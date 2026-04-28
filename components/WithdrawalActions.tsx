@@ -22,16 +22,16 @@ export default function WithdrawalActions({ id, affiliateName, amount, pixKey }:
     if (!confirm(`Confirmar pagamento de R$ ${amount} para ${affiliateName} via PIX (${pixKey})?`)) return;
     setLoading('approve');
     const result = await approveWithdrawal(id);
-    if (result.success) setDone('approved');
-    else setError(result.error || 'Erro ao aprovar.');
+    if ('error' in result) setError(result.error || 'Erro ao aprovar.');
+    else setDone('approved');
     setLoading(null);
   }
 
   async function handleReject() {
     setLoading('reject');
     const result = await rejectWithdrawal(id, rejectNote);
-    if (result.success) setDone('rejected');
-    else setError(result.error || 'Erro ao rejeitar.');
+    if ('error' in result) setError(result.error || 'Erro ao rejeitar.');
+    else setDone('rejected');
     setLoading(null);
     setShowReject(false);
   }
