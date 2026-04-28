@@ -29,10 +29,12 @@ export async function requestWithdrawal(formData: FormData) {
       return { error: 'Informe a chave PIX e o tipo corretamente.' };
     }
 
+    const userId = session.user.id;
+
     return await db.transaction(async (tx) => {
       // Fetch fresh user data within transaction
       const [user] = await tx.select().from(users)
-        .where(eq(users.id, session.user.id))
+        .where(eq(users.id, userId))
         .for('update'); // Lock row for update
 
       if (!user) return { error: 'Usuário não encontrado.' };
