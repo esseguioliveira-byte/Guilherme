@@ -102,7 +102,7 @@ export default async function AffiliateDashboard() {
                      <p className="text-xl font-black italic text-white">R$ {Number(user.balance).toFixed(2).replace('.', ',')}</p>
                   </div>
                </div>
-               <WithdrawalButton balance={parseFloat(user.balance as string)} />
+               <WithdrawalButton />
             </div>
           </div>
         </section>
@@ -251,7 +251,7 @@ export default async function AffiliateDashboard() {
             <h3 className="text-xl font-bold flex items-center gap-3">
               <Wallet className="w-5 h-5 text-primary" /> Histórico de Saques
             </h3>
-            <WithdrawalButton balance={parseFloat(user.balance as string)} />
+            <WithdrawalButton />
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
