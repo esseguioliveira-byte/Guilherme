@@ -18,11 +18,11 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="h-screen bg-black flex overflow-hidden">
+    <div className="h-screen bg-black flex flex-col md:flex-row overflow-hidden">
       <AdminSidebar user={{ name: session.user.name, email: session.user.email }} />
 
       {/* Main Content */}
-      <main className="flex-1 p-8 overflow-y-auto">
+      <main className="flex-1 p-4 md:p-8 overflow-y-auto">
         {children}
       </main>
     </div>

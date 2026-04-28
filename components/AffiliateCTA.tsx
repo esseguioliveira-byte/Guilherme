@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { joinAffiliateProgram } from '@/app/actions/affiliate';
-import { Loader2, CheckCircle, Copy, ShieldCheck } from 'lucide-react';
+import { Loader2, CheckCircle, Copy, ShieldCheck, LayoutDashboard } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function AffiliateCTA({ initialIsAffiliate, initialCode }: { initialIsAffiliate: boolean, initialCode?: string | null }) {
   const [loading, setLoading] = useState(false);
@@ -39,13 +40,20 @@ export default function AffiliateCTA({ initialIsAffiliate, initialCode }: { init
         <h2 className="text-3xl font-bold mb-2 italic uppercase">Você já faz parte do time!</h2>
         <p className="text-gray-400 mb-8">Seu código de afiliado é: <span className="text-emerald-400 font-black tracking-widest">{result.code}</span></p>
         
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-2xl mx-auto">
           <button 
             onClick={copyToClipboard}
-            className="flex items-center gap-3 px-10 py-5 bg-emerald-500 hover:bg-emerald-600 rounded-2xl font-black text-xl transition-all shadow-[0_20px_40px_rgba(16,185,129,0.3)] uppercase italic"
+            className="w-full sm:w-auto flex-1 flex justify-center items-center gap-3 px-8 py-5 bg-emerald-500 hover:bg-emerald-600 rounded-2xl font-black text-lg sm:text-xl transition-all shadow-[0_20px_40px_rgba(16,185,129,0.3)] uppercase italic"
           >
-            <Copy className="w-6 h-6" /> Copiar Link de Afiliado
+            <Copy className="w-5 h-5 sm:w-6 sm:h-6" /> Copiar Link
           </button>
+          
+          <Link 
+            href="/affiliates/dashboard"
+            className="w-full sm:w-auto flex-1 flex justify-center items-center gap-3 px-8 py-5 bg-[#111] hover:bg-[#222] text-white border border-[#333] rounded-2xl font-black text-lg sm:text-xl transition-all uppercase italic"
+          >
+            <LayoutDashboard className="w-5 h-5 sm:w-6 sm:h-6" /> Acessar Painel
+          </Link>
         </div>
         <p className="text-gray-500 mt-6 text-sm flex items-center justify-center gap-2">
           <ShieldCheck className="w-4 h-4" /> Comece a divulgar e lucrar hoje mesmo.

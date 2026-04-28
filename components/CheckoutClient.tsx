@@ -106,11 +106,11 @@ export default function CheckoutClient({ user }: { user: any }) {
         <h1 className="text-4xl font-bold text-white tracking-tight">Finalizar Compra</h1>
       </div>
 
-      <div className="flex flex-col xl:flex-row gap-10 items-start">
+      <div className="flex flex-col xl:flex-row gap-8 xl:gap-10 items-start">
         {/* Coluna Esquerda */}
-        <div className="flex-1 w-full space-y-8">
+        <div className="contents xl:flex xl:flex-col xl:flex-1 xl:w-full xl:gap-8">
           
-          <div className="bg-[#0A0A0A] border border-[#222] rounded-2xl p-8 shadow-[0_10px_40px_rgba(0,0,0,0.4)]">
+          <div className="order-1 xl:order-none w-full bg-[#0A0A0A] border border-[#222] rounded-2xl p-8 shadow-[0_10px_40px_rgba(0,0,0,0.4)]">
             <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-3">
               <span className="w-8 h-8 rounded-full bg-primary/20 text-primary text-sm flex items-center justify-center border border-primary/30">1</span>
               Formas de pagamento
@@ -140,7 +140,7 @@ export default function CheckoutClient({ user }: { user: any }) {
             </div>
           </div>
 
-          <div className="bg-[#0A0A0A] border border-[#222] rounded-2xl p-8 shadow-[0_10px_40px_rgba(0,0,0,0.4)]">
+          <div className="order-2 xl:order-none w-full bg-[#0A0A0A] border border-[#222] rounded-2xl p-8 shadow-[0_10px_40px_rgba(0,0,0,0.4)]">
             <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-3">
               <span className="w-8 h-8 rounded-full bg-primary/20 text-primary text-sm flex items-center justify-center border border-primary/30">2</span>
               Informações de contato
@@ -166,7 +166,7 @@ export default function CheckoutClient({ user }: { user: any }) {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="order-5 xl:order-none w-full grid grid-cols-1 sm:grid-cols-3 gap-4">
              <div className="bg-[#0A0A0A] border border-[#222] p-4 rounded-xl flex items-center gap-3">
                 <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
                   <Check className="w-5 h-5 text-primary" />
@@ -187,7 +187,7 @@ export default function CheckoutClient({ user }: { user: any }) {
              </div>
           </div>
 
-          <div className="space-y-6 pt-6">
+          <div className="order-4 xl:order-none w-full space-y-6">
             <label className="flex items-start gap-4 cursor-pointer group bg-[#111]/30 p-4 rounded-xl border border-transparent hover:border-[#222] transition-all">
               <div className={`mt-0.5 w-6 h-6 rounded-lg border flex items-center justify-center transition-all ${acceptedTerms ? 'bg-primary border-primary shadow-[0_0_15px_rgba(59,130,246,0.4)]' : 'border-[#333] group-hover:border-primary/40'}`}>
                 {acceptedTerms && <Check className="w-4 h-4 text-white" />}
@@ -216,7 +216,7 @@ export default function CheckoutClient({ user }: { user: any }) {
         </div>
 
         {/* Coluna Direita: Resumo */}
-        <div className="w-full xl:w-[480px] shrink-0 lg:sticky lg:top-24">
+        <div className="order-3 xl:order-none w-full xl:w-[480px] shrink-0 xl:sticky xl:top-24">
           <div className="bg-[#0A0A0A] border border-[#222] rounded-2xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
             
             <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#222]">

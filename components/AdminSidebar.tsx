@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
@@ -13,7 +14,9 @@ import {
   ShoppingBag, 
   Tag, 
   Banknote, 
-  ListTree 
+  ListTree,
+  Menu,
+  X 
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -25,6 +28,11 @@ interface AdminSidebarProps {
 
 export default function AdminSidebar({ user }: AdminSidebarProps) {
   const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
 
   const navLinks = [
     { name: 'Visão Geral', href: '/admin', icon: LayoutDashboard, exact: true },
@@ -40,21 +48,55 @@ export default function AdminSidebar({ user }: AdminSidebarProps) {
   ];
 
   return (
-    <aside className="w-64 border-r border-[#222] bg-[#0A0A0A] hidden md:flex flex-col">
-      <div className="p-6 border-b border-[#222]">
-        <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider" style={{ fontFamily: 'var(--font-jakarta)' }}>
-          Painel Admin
-        </h2>
-        <div className="mt-4 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/50 shadow-[0_0_10px_rgba(59,130,246,0.2)]">
+    <>
+      {/* Mobile Topbar */}
+      <div className="md:hidden flex items-center justify-between p-4 border-b border-[#222] bg-[#0A0A0A] shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center border border-primary/50 shadow-[0_0_10px_rgba(59,130,246,0.2)]">
             <span className="text-primary font-bold">{user.name?.[0] || 'A'}</span>
           </div>
-          <div className="overflow-hidden">
-            <p className="text-white font-medium truncate text-sm">{user.name}</p>
-            <p className="text-xs text-gray-500 truncate">{user.email}</p>
-          </div>
+          <h2 className="text-sm font-bold text-gray-300 uppercase tracking-wider" style={{ fontFamily: 'var(--font-jakarta)' }}>
+            Painel Admin
+          </h2>
         </div>
+        <button onClick={() => setIsOpen(true)} className="p-2 text-gray-400 hover:text-white bg-[#111] rounded-lg border border-[#222] transition-colors">
+          <Menu className="w-5 h-5" />
+        </button>
       </div>
+
+      {/* Overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 md:hidden" 
+          onClick={() => setIsOpen(false)} 
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside className={`
+        fixed inset-y-0 left-0 z-50 w-64 bg-[#0A0A0A] border-r border-[#222] flex flex-col transition-transform duration-300 ease-in-out
+        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        md:relative md:translate-x-0
+      `}>
+        <div className="p-6 border-b border-[#222] flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider hidden md:block" style={{ fontFamily: 'var(--font-jakarta)' }}>
+              Painel Admin
+            </h2>
+            <div className="mt-0 md:mt-4 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/50 shadow-[0_0_10px_rgba(59,130,246,0.2)]">
+                <span className="text-primary font-bold">{user.name?.[0] || 'A'}</span>
+              </div>
+              <div className="overflow-hidden">
+                <p className="text-white font-medium truncate text-sm">{user.name}</p>
+                <p className="text-xs text-gray-500 truncate">{user.email}</p>
+              </div>
+            </div>
+          </div>
+          <button onClick={() => setIsOpen(false)} className="md:hidden p-2 text-gray-400 hover:text-white bg-[#111] rounded-lg border border-[#222]">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
       
       <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto custom-scrollbar">
         {navLinks.map((link) => {
@@ -94,5 +136,6 @@ export default function AdminSidebar({ user }: AdminSidebarProps) {
         </button>
       </div>
     </aside>
+    </>
   );
 }
