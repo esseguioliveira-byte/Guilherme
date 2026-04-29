@@ -13,7 +13,7 @@ import { claimNextPendingJob, markAsSent, markAsFailed } from './queue';
 import { renderTemplate } from './templates';
 
 const POLL_MS = Number(process.env.EMAIL_POLL_MS ?? 500);
-const SEND_TIMEOUT_MS = Number(process.env.EMAIL_SEND_TIMEOUT_MS ?? 10_000);
+const SEND_TIMEOUT_MS = Number(process.env.EMAIL_SEND_TIMEOUT_MS ?? 30_000);
 const RATE_LIMIT = Number(process.env.EMAIL_RATE_LIMIT ?? 14); // emails/second per worker
 
 /** Metrics counters (in-memory, per-process) */
@@ -38,6 +38,8 @@ async function sendWithTimeout(
   text?: string | null,
 ): Promise<void> {
   const transporter = getTransporter();
+
+  console.log(`[EmailSystem] 📤 Attempting to send from: ${FROM_ADDRESS}`);
 
   const sendPromise = transporter.sendMail({
     from: FROM_ADDRESS,

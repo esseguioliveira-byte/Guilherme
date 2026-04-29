@@ -23,6 +23,8 @@ function buildTransporter(): Transporter {
         user: 'apikey',
         pass: process.env.SENDGRID_API_KEY,
       },
+      debug: true,
+      logger: true,
     });
   }
 
@@ -37,6 +39,8 @@ function buildTransporter(): Transporter {
         user: process.env.SES_SMTP_USER,
         pass: process.env.SES_SMTP_PASS,
       },
+      debug: true,
+      logger: true,
     });
   }
 
@@ -51,6 +55,8 @@ function buildTransporter(): Transporter {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
     },
+    debug: true,
+    logger: true,
   });
 }
 
