@@ -56,10 +56,12 @@ function buildTransporter(): Transporter {
     },
     debug: true,
     logger: true,
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
+    connectionTimeout: 20000,
+    greetingTimeout: 20000,
+    socketTimeout: 30000,
     tls: {
       rejectUnauthorized: false,
+      servername: process.env.SMTP_HOST ?? 'smtp.hostinger.com', // Explicit SNI for Cloudflare
     },
   });
 }
