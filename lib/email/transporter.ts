@@ -57,6 +57,11 @@ function buildTransporter(): Transporter {
     },
     debug: true,
     logger: true,
+    connectionTimeout: 10000, // 10 seconds for initial connection
+    greetingTimeout: 10000,
+    tls: {
+      rejectUnauthorized: false, // Helps with some hosting certificate issues
+    },
   });
 }
 
