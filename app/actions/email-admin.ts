@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/db';
-import { emailQueue, dead_letter_emails } from '@/db/schema';
+import { emailQueue, deadLetterEmails } from '@/db/schema';
 import { desc, eq, count, sql } from 'drizzle-orm';
 import { auth } from '@/auth';
 
@@ -23,8 +23,8 @@ export async function getEmailErrors(limit = 50) {
     .limit(limit);
 
   const deadLetters = await db.select()
-    .from(dead_letter_emails)
-    .orderBy(desc(dead_letter_emails.failedAt))
+    .from(deadLetterEmails)
+    .orderBy(desc(deadLetterEmails.createdAt))
     .limit(limit);
 
   return { failedJobs, deadLetters };
@@ -60,6 +60,6 @@ export async function retryEmail(id: string) {
  */
 export async function clearDeadLetters() {
   await checkAdmin();
-  await db.delete(dead_letter_emails);
+  await db.delete(deadLetterEmails);
   return { success: true };
 }
