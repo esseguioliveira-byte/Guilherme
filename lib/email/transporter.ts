@@ -49,18 +49,17 @@ function buildTransporter(): Transporter {
     host: process.env.SMTP_HOST ?? 'smtp.gmail.com',
     port: Number(process.env.SMTP_PORT ?? 587),
     secure: process.env.SMTP_SECURE === 'true',
-    pool: true,
-    maxConnections: poolSize,
+    // Removed pool: true to fix connection timeouts with Hostinger/Cloudflare
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
     },
     debug: true,
     logger: true,
-    connectionTimeout: 10000, // 10 seconds for initial connection
+    connectionTimeout: 10000,
     greetingTimeout: 10000,
     tls: {
-      rejectUnauthorized: false, // Helps with some hosting certificate issues
+      rejectUnauthorized: false,
     },
   });
 }
