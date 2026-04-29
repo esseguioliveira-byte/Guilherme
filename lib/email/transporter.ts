@@ -9,6 +9,7 @@ export type EmailProvider = 'smtp' | 'sendgrid' | 'ses';
 
 function buildTransporter(): Transporter {
   const provider = (process.env.EMAIL_PROVIDER ?? 'smtp') as EmailProvider;
+  console.log(`[EmailSystem] 🔌 Connecting to provider: ${provider.toUpperCase()}...`);
   const poolSize = Number(process.env.EMAIL_POOL_SIZE ?? 5);
 
   if (provider === 'sendgrid') {

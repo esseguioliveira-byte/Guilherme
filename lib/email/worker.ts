@@ -94,7 +94,7 @@ async function processOneJob(workerId: number): Promise<boolean> {
     metrics.sent++;
 
     const durationMs = Date.now() - startedAt;
-    console.log(`[Worker-${workerId}] ✅ Sent ${job.id} in ${durationMs}ms`);
+    console.log(`[Worker-${workerId}] ✅ Success: ${job.id} | Duration: ${durationMs}ms | To: ${job.to}`);
 
     // Rate limit: wait if needed
     if (durationMs < 1000 / RATE_LIMIT) {

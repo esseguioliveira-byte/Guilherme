@@ -16,7 +16,7 @@ CREATE TABLE `email_queue` (
 	`created_at` timestamp NOT NULL DEFAULT (now()),
 	CONSTRAINT `email_queue_id` PRIMARY KEY(`id`)
 );
---> statement-breakpoint
+
 CREATE TABLE `dead_letter_emails` (
 	`id` varchar(255) NOT NULL,
 	`original_id` varchar(255) NOT NULL,
@@ -31,7 +31,7 @@ CREATE TABLE `dead_letter_emails` (
 	`created_at` timestamp NOT NULL DEFAULT (now()),
 	CONSTRAINT `dead_letter_emails_id` PRIMARY KEY(`id`)
 );
---> statement-breakpoint
+
 CREATE INDEX `email_queue_status_retry_idx` ON `email_queue` (`status`, `next_retry_at`);
---> statement-breakpoint
+
 CREATE INDEX `email_queue_created_idx` ON `email_queue` (`created_at`);

@@ -179,7 +179,7 @@ export async function markAsFailed(id: string, error: string): Promise<void> {
   }
 
   const nextRetry = calculateNextRetry(newAttempts);
-  console.log(`[EmailQueue] ↩️  Retry scheduled: ${id} attempt ${newAttempts} at ${nextRetry.toISOString()}`);
+  console.log(`[EmailQueue] ↩️  Retry scheduled: ${id} | Attempt: ${newAttempts}/${job.maxAttempts} | Next retry in: ${((nextRetry.getTime() - Date.now()) / 1000).toFixed(1)}s`);
 
   await db
     .update(emailQueue)
@@ -238,7 +238,7 @@ export async function markAsDeadLetter(
       .where(eq(emailQueue.id, id));
   });
 
-  console.warn(`[EmailQueue] ☠️  Dead letter: ${id} → ${job.to} after ${finalAttempts ?? job.attempts} attempts`);
+  console.error(`[EmailQueue] ☠️  DEAD LETTER: ${id} | Final failure: ${error.slice(0, 100)}... | Check dead_letter_emails table for details.`);
 }
 
 /**
