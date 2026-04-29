@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { paymentSettings, orders, stockItems } from '@/db/schema';
-import { eq, sql, inArray } from 'drizzle-orm';
+import { paymentSettings, orders, orderItems, stockItems } from '@/db/schema';
+import { eq, sql } from 'drizzle-orm';
 import crypto from 'crypto';
+import { emailService } from '@/lib/email';
 
 function validateWebhookSignature(payload: string, signature: string, secret: string): boolean {
   const expected = crypto.createHmac('sha256', secret).update(payload).digest('hex');
@@ -124,12 +125,72 @@ export async function POST(req: NextRequest) {
       });
 
       console.log(`[Stylepay Webhook] ✅ Entrega Automática (Multi-Slot) Concluída: Pedido ${orderId}`);
+
+      // ── Email: Confirmação de compra ─────────────────────────────────────────
+      try {
+        const deliveryEmail = order?.deliveryEmail;
+        const paidItems = await db.select().from(orderItems).where(eq(orderItems.orderId, orderId));
+        if (deliveryEmail) {
+          await emailService.sendEmail({
+            to: deliveryEmail,
+            template: 'order-confirmed',
+            data: {
+              orderId,
+              userName: 'Cliente',
+              totalAmount: order?.totalAmount ?? '0.00',
+              items: paidItems.map(i => ({
+                name: `Produto ${i.productId.slice(0, 6)}`,
+                quantity: i.quantity,
+                price: String(i.price),
+              })),
+            },
+          });
+        }
+        // Admin notification
+        if (process.env.ADMIN_EMAIL) {
+          await emailService.sendEmail({
+            to: process.env.ADMIN_EMAIL,
+            template: 'admin-new-order',
+            data: {
+              orderId,
+              customerName: 'Cliente',
+              customerEmail: deliveryEmail ?? 'desconhecido',
+              totalAmount: order?.totalAmount ?? '0.00',
+              items: paidItems.map(i => ({
+                name: `Produto ${i.productId.slice(0, 6)}`,
+                quantity: i.quantity,
+                price: String(i.price),
+              })),
+            },
+          });
+        }
+      } catch (emailErr: any) {
+        console.error('[Stylepay Webhook] Email send error (non-fatal):', emailErr?.message);
+      }
     } else if (isCancelled) {
       await db.update(orders)
         .set({ status: 'CANCELLED' })
         .where(eq(orders.id, orderId));
 
       console.log(`[Stylepay Webhook] ❌ Pedido ${orderId} cancelado`);
+
+      // ── Email: Pedido cancelado ───────────────────────────────────────────────
+      try {
+        const [cancelledOrder] = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
+        if (cancelledOrder?.deliveryEmail) {
+          await emailService.sendEmail({
+            to: cancelledOrder.deliveryEmail,
+            template: 'order-cancelled',
+            data: {
+              orderId,
+              userName: 'Cliente',
+              totalAmount: cancelledOrder.totalAmount,
+            },
+          });
+        }
+      } catch (emailErr: any) {
+        console.error('[Stylepay Webhook] Cancellation email error (non-fatal):', emailErr?.message);
+      }
     }
 
     return NextResponse.json({ received: true, orderId });

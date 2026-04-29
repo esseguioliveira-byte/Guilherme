@@ -7,6 +7,7 @@ import { eq, inArray, sql } from 'drizzle-orm';
 import { auth } from '@/auth';
 import { consumeCoupon, validateCoupon } from './coupons';
 import { generateStylepayPixQrCode } from '@/lib/stylepay';
+import { emailService } from '@/lib/email';
 
 interface CartItemInput {
   productId: string;
@@ -165,6 +166,19 @@ export async function processCartPurchase(items: CartItemInput[], couponCode?: s
               type: 'COMMISSION',
               description: `Comissão da venda #${orderId.slice(0, 8)} (Ref: ${currentUser.name})`,
             });
+
+            // ── Email: Notificação de comissão (non-blocking) ──────────────────────
+            const updatedAffiliate = await tx.select({ balance: users.balance }).from(users).where(eq(users.id, affiliate.id)).then(r => r[0]);
+            emailService.sendEmail({
+              to: affiliate.email,
+              template: 'affiliate-commission',
+              data: {
+                affiliateName: affiliate.name ?? 'Afiliado',
+                commissionAmount: commissionAmount.toFixed(2),
+                orderId,
+                balance: updatedAffiliate?.balance ?? '0.00',
+              },
+            }).catch(err => console.error('[Checkout] Commission email error:', err?.message));
           }
         }
       }

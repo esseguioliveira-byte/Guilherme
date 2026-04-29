@@ -8,6 +8,7 @@ import { eq } from 'drizzle-orm';
 import { hash } from 'bcryptjs';
 import crypto from 'crypto';
 import { cookies } from 'next/headers';
+import { emailService } from '@/lib/email';
 
 export async function authenticate(
   prevState: string | undefined,
@@ -100,6 +101,13 @@ export async function registerUser(
       password: hashedPassword,
       referredBy,
     });
+
+    // ── Email: Boas-vindas (non-blocking) ───────────────────────────────
+    emailService.sendEmail({
+      to: email,
+      template: 'welcome',
+      data: { name },
+    }).catch(err => console.error('[Auth] Welcome email error:', err?.message));
 
     // Faz o login automático após o cadastro
     const data = Object.fromEntries(formData.entries());

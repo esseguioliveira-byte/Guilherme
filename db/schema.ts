@@ -258,3 +258,42 @@ export type SiteVisit = typeof siteVisits.$inferSelect;
 export type Coupon = typeof coupons.$inferSelect;
 export type WithdrawalRequest = typeof withdrawalRequests.$inferSelect;
 export type PaymentSettings = typeof paymentSettings.$inferSelect;
+
+// ── Email Queue ──────────────────────────────────────────────────────────────
+
+export const emailQueue = mysqlTable('email_queue', {
+  id: varchar('id', { length: 255 }).primaryKey(),
+  to: varchar('to', { length: 255 }).notNull(),
+  subject: varchar('subject', { length: 500 }),
+  html: text('html'),
+  text: text('text'),
+  template: varchar('template', { length: 100 }),
+  data: text('data'), // JSON serialized template data
+  status: mysqlEnum('status', ['PENDING', 'PROCESSING', 'SENT', 'FAILED', 'DEAD_LETTER'])
+    .notNull()
+    .default('PENDING'),
+  attempts: int('attempts').notNull().default(0),
+  maxAttempts: int('max_attempts').notNull().default(5),
+  nextRetryAt: timestamp('next_retry_at', { mode: 'date' }).defaultNow().notNull(),
+  processingStartedAt: timestamp('processing_started_at', { mode: 'date' }),
+  sentAt: timestamp('sent_at', { mode: 'date' }),
+  error: text('error'),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+});
+
+export const deadLetterEmails = mysqlTable('dead_letter_emails', {
+  id: varchar('id', { length: 255 }).primaryKey(),
+  originalId: varchar('original_id', { length: 255 }).notNull(),
+  to: varchar('to', { length: 255 }).notNull(),
+  subject: varchar('subject', { length: 500 }),
+  html: text('html'),
+  text: text('text'),
+  template: varchar('template', { length: 100 }),
+  data: text('data'),
+  attempts: int('attempts').notNull(),
+  lastError: text('last_error'),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+});
+
+export type EmailQueue = typeof emailQueue.$inferSelect;
+export type DeadLetterEmail = typeof deadLetterEmails.$inferSelect;

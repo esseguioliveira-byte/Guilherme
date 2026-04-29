@@ -3,9 +3,10 @@
 import { auth } from '@/auth';
 import { db } from '@/db';
 import { users, withdrawalRequests, affiliateTransactions } from '@/db/schema';
-import { eq, desc, and } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { randomUUID } from 'crypto';
+import { emailService } from '@/lib/email';
 
 const MIN_WITHDRAWAL = 20; // R$20 mínimo
 
@@ -63,14 +64,44 @@ export async function requestWithdrawal(formData: FormData) {
         .where(eq(users.id, user.id));
 
       // 2. Create the request record
+      const withdrawalId = randomUUID();
       await tx.insert(withdrawalRequests).values({
-        id: randomUUID(),
+        id: withdrawalId,
         affiliateId: user.id,
         amount: amount.toFixed(2),
         pixKey,
         pixKeyType,
         status: 'PENDING',
       });
+
+      // ── Email: Confirmação de saque (non-blocking) ───────────────────────────
+      emailService.sendEmail({
+        to: user.email,
+        template: 'withdrawal-submitted',
+        data: {
+          affiliateName: user.name ?? 'Afiliado',
+          amount: amount.toFixed(2),
+          pixKey,
+          pixKeyType,
+          requestId: withdrawalId,
+        },
+      }).catch(err => console.error('[Withdrawal] Submit email error:', err?.message));
+
+      // Admin notification
+      if (process.env.ADMIN_EMAIL) {
+        emailService.sendEmail({
+          to: process.env.ADMIN_EMAIL,
+          template: 'admin-withdrawal-request',
+          data: {
+            affiliateName: user.name ?? 'Afiliado',
+            affiliateEmail: user.email,
+            amount: amount.toFixed(2),
+            pixKey,
+            pixKeyType,
+            requestId: withdrawalId,
+          },
+        }).catch(err => console.error('[Withdrawal] Admin email error:', err?.message));
+      }
 
       return { success: true, message: 'Solicitação realizada com sucesso! O valor será enviado para sua chave PIX em até 48h úteis.' };
     });
@@ -111,6 +142,25 @@ export async function approveWithdrawal(id: string) {
     description: `Saque PIX aprovado — chave: ${request.pixKey}`,
   });
 
+  // ── Email: Saque aprovado ────────────────────────────────────────────
+  try {
+    const affiliate = await db.select().from(users).where(eq(users.id, request.affiliateId)).then(r => r[0]);
+    if (affiliate) {
+      await emailService.sendEmail({
+        to: affiliate.email,
+        template: 'withdrawal-approved',
+        data: {
+          affiliateName: affiliate.name ?? 'Afiliado',
+          amount: String(request.amount),
+          pixKey: request.pixKey,
+          requestId: request.id,
+        },
+      });
+    }
+  } catch (emailErr: any) {
+    console.error('[Withdrawal] Approval email error:', emailErr?.message);
+  }
+
   revalidatePath('/admin/withdrawals');
   return { success: true };
 }
@@ -144,6 +194,25 @@ export async function rejectWithdrawal(id: string, note: string) {
     adminNote: note || 'Rejeitado pelo administrador.',
     resolvedAt: new Date(),
   }).where(eq(withdrawalRequests.id, id));
+
+  // ── Email: Saque rejeitado ─────────────────────────────────────────────
+  try {
+    const affiliate = await db.select().from(users).where(eq(users.id, request.affiliateId)).then(r => r[0]);
+    if (affiliate) {
+      await emailService.sendEmail({
+        to: affiliate.email,
+        template: 'withdrawal-rejected',
+        data: {
+          affiliateName: affiliate.name ?? 'Afiliado',
+          amount: String(request.amount),
+          requestId: request.id,
+          adminNote: note || undefined,
+        },
+      });
+    }
+  } catch (emailErr: any) {
+    console.error('[Withdrawal] Rejection email error:', emailErr?.message);
+  }
 
   revalidatePath('/admin/withdrawals');
   return { success: true };

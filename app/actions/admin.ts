@@ -8,6 +8,7 @@ import { synchronizeProductStock } from './stock-sync';
 import { auth } from '@/auth';
 import crypto from 'crypto';
 import { revalidatePath } from 'next/cache';
+import { emailService } from '@/lib/email';
 
 // Middleware para verificar permissão
 async function checkAdmin() {
@@ -57,6 +58,49 @@ export async function updateOrderStatus(orderId: string, status: 'PENDING' | 'PA
         }
         
         await synchronizeProductStock(item.productId);
+      }
+      
+      // ── Email: Confirmação de compra (Manual) ─────────────────────────────
+      try {
+        const user = await db.select().from(users).where(eq(users.id, userId)).then(r => r[0]);
+        const deliveryEmail = oldOrder.deliveryEmail || user?.email;
+        if (deliveryEmail) {
+          await emailService.sendEmail({
+            to: deliveryEmail,
+            template: 'order-confirmed',
+            data: {
+              orderId,
+              userName: user?.name || 'Cliente',
+              totalAmount: oldOrder.totalAmount,
+              items: items.map(i => ({
+                name: `Produto ${i.productId.slice(0, 6)}`,
+                quantity: i.quantity,
+                price: String(i.price),
+              })),
+            },
+          });
+        }
+      } catch (err: any) {
+        console.error('[Admin] Order confirmed email error:', err?.message);
+      }
+    } else if (status === 'CANCELLED' && oldOrder?.status !== 'CANCELLED') {
+      // ── Email: Pedido cancelado (Manual) ──────────────────────────────────
+      try {
+        const user = await db.select().from(users).where(eq(users.id, oldOrder.userId)).then(r => r[0]);
+        const deliveryEmail = oldOrder.deliveryEmail || user?.email;
+        if (deliveryEmail) {
+          await emailService.sendEmail({
+            to: deliveryEmail,
+            template: 'order-cancelled',
+            data: {
+              orderId,
+              userName: user?.name || 'Cliente',
+              totalAmount: oldOrder.totalAmount,
+            },
+          });
+        }
+      } catch (err: any) {
+        console.error('[Admin] Order cancelled email error:', err?.message);
       }
     }
 
